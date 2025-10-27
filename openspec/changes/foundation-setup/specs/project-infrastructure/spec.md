@@ -46,16 +46,16 @@ The system SHALL use Turborepo to orchestrate builds, tests, and linting across 
 - **AND** the command SHALL fail if any type errors exist
 
 ### Requirement: Local Development Environment
-The system SHALL provide a Docker Compose configuration to run PostgreSQL and Redis locally.
+The system SHALL provide a Docker Compose configuration to run MySQL locally.
 
 **Rationale**: Ensures consistent development environment across team members without manual database setup.
 
 #### Scenario: Developer starts local services
 - **GIVEN** Docker is installed on the developer's machine
 - **WHEN** they run `docker-compose up -d`
-- **THEN** PostgreSQL 15 SHALL start on port 5432
-- **AND** Redis 7 SHALL start on port 6379
-- **AND** databases SHALL persist data in named volumes
+- **THEN** MySQL 8.0 SHALL start on port 3306
+- **AND** the database SHALL persist data in named volumes
+- **AND** MySQL SHALL be configured with utf8mb4 character set
 
 #### Scenario: Developer resets local database
 - **GIVEN** Docker services are running
@@ -81,7 +81,7 @@ The system SHALL use environment variables for configuration with `.env` files f
 **Rationale**: Follows 12-factor app principles and enables different configs per environment.
 
 #### Scenario: Developer configures backend
-- **GIVEN** the backend requires database and Redis URLs
+- **GIVEN** the backend requires database URL
 - **WHEN** the developer creates `apps/api/.env` with required variables
 - **THEN** the backend SHALL read configuration from environment variables
 - **AND** the application SHALL fail to start if required variables are missing

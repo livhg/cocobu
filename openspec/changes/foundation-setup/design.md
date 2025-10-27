@@ -24,14 +24,14 @@
 │  - Auth Guards (JWT)                                    │
 │  - Business Logic Services                             │
 │  - Prisma Client                                        │
-└─────┬──────────────────────────────────────────┬────────┘
-      │                                           │
-      ▼                                           ▼
-┌──────────────┐                          ┌──────────────┐
-│  PostgreSQL  │                          │    Redis     │
-│  (Primary    │                          │  (Cache +    │
-│   Data)      │                          │   Queue)     │
-└──────────────┘                          └──────────────┘
+└─────┴──────────────────────────────────────────────────┘
+      │
+      ▼
+┌──────────────┐
+│    MySQL     │
+│  (Primary    │
+│   Data)      │
+└──────────────┘
 ```
 
 ## Component Design
@@ -196,12 +196,13 @@ Category (categories)
 
 **Key Design Decisions**
 
-1. **UUID Primary Keys**: Better for distributed systems, harder to enumerate
+1. **UUID Primary Keys**: Better for distributed systems, harder to enumerate (stored as CHAR(36) in MySQL)
 2. **Decimal for Money**: Avoid floating-point errors (precision 19, scale 4 supports up to 999,999,999,999,999.9999)
 3. **Separate Currency Fields**: Store original currency + converted amount for transparency
 4. **Soft Deletes**: Not in MVP (can add later with `deleted_at` field)
 5. **Optimistic Locking**: `version` field on entries to handle concurrent edits
 6. **Self-Referential Mirror**: `source_entry_id` links mirror entries to original split entries
+7. **JSON Storage**: Use TEXT with JSON validation for Settlement payload in MySQL
 
 ### 3. Authentication Flow
 
@@ -258,8 +259,8 @@ interface SessionToken {
 **Security Considerations**
 - Magic link tokens expire in 15 minutes
 - Session tokens expire in 7 days
-- Tokens are single-use (tracked in Redis)
-- Rate limiting: 3 requests per email per hour
+- Tokens are single-use (tracked in database)
+- Rate limiting: 3 requests per email per hour (tracked in database)
 - HTTPS only for cookies (secure flag)
 - HttpOnly cookies to prevent XSS
 
@@ -439,6 +440,7 @@ jobs:
 - Migration management
 - Excellent TypeScript support
 - Good performance with proper indexes
+- MySQL 8.0+ support with full feature compatibility
 
 ### Why Turborepo?
 - Simple configuration
@@ -464,7 +466,7 @@ CREATE INDEX idx_allocations_user ON allocations(user_id);
 ### Connection Pooling
 
 ```typescript
-// Prisma connection pool
+// Prisma connection pool for MySQL
 const prisma = new PrismaClient({
   datasources: {
     db: {
@@ -476,9 +478,10 @@ const prisma = new PrismaClient({
 
 ### Caching Strategy
 
-- **Redis**: Cache user sessions, rate limit counters
+- **In-Memory**: Rate limit counters stored in database table with TTL cleanup
 - **TanStack Query**: Client-side cache with 5min stale time
 - **Next.js**: Static generation for landing pages
+- **Stateless JWT**: No server-side session storage needed
 
 ## Security Measures
 
@@ -486,8 +489,7 @@ const prisma = new PrismaClient({
 
 ```bash
 # Backend (.env)
-DATABASE_URL=postgresql://...
-REDIS_URL=redis://...
+DATABASE_URL=mysql://user:password@localhost:3306/cocobu
 JWT_SECRET=...
 SMTP_HOST=...
 SMTP_USER=...
@@ -544,7 +546,7 @@ export class CreateBookDto {
 ### Test Database
 ```bash
 # Use separate test database
-DATABASE_URL=postgresql://localhost:5432/cocobu_test
+DATABASE_URL=mysql://root:test@localhost:3306/cocobu_test
 ```
 
 ## Open Technical Questions

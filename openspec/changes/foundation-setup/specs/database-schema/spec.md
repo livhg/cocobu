@@ -1,7 +1,7 @@
 # Specification: Database Schema
 
 ## Overview
-Defines the complete PostgreSQL database schema using Prisma ORM for all CocoBu entities.
+Defines the complete MySQL database schema using Prisma ORM for all CocoBu entities.
 
 ## ADDED Requirements
 
@@ -25,7 +25,7 @@ The system SHALL define Prisma models for all core entities: User, Book, Members
 - **AND** the client SHALL be importable as `@cocobu/database`
 
 ### Requirement: User Model
-The system SHALL store user accounts with encrypted email and name fields.
+The system SHALL store user accounts with encrypted email and name fields using MySQL's AES encryption or application-level encryption.
 
 **Rationale**: Protects user PII at rest in compliance with GDPR principles.
 
@@ -151,7 +151,7 @@ The system SHALL store settlement snapshots with period and computed balances.
 - **GIVEN** a split book has entries over a period
 - **WHEN** a settlement is created for the period
 - **THEN** the settlement SHALL store period_start and period_end dates
-- **AND** the payload (JSONB) SHALL contain net balances per user
+- **AND** the payload (TEXT with JSON) SHALL contain net balances per user
 - **AND** the payload SHALL contain minimum transfer paths
 - **AND** the created_at timestamp SHALL be recorded
 

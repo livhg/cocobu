@@ -55,8 +55,7 @@ cocobu/
 
 #### 2. Backend (NestJS)
 - **REST API** with OpenAPI/Swagger documentation
-- **Prisma** ORM with PostgreSQL
-- **BullMQ** job queue (Redis)
+- **Prisma** ORM with MySQL
 - **JWT-based auth** with magic link flow
 - **Validation** with class-validator
 
@@ -66,6 +65,7 @@ Complete Prisma schema including:
 - Proper relationships and indexes
 - Audit fields: created_at, updated_at, version
 - Encrypted field support (email, real_name)
+- MySQL-compatible field types (DECIMAL for money, TEXT for JSON)
 
 #### 4. Authentication
 - Magic link email-based auth (passwordless)
@@ -93,8 +93,8 @@ Complete Prisma schema including:
 - **Future development**: Enables all feature work
 
 ### System Impact
-- **New dependencies**: Next.js, NestJS, Prisma, PostgreSQL, Redis, numerous npm packages
-- **Infrastructure**: Requires PostgreSQL and Redis in dev and prod
+- **New dependencies**: Next.js, NestJS, Prisma, MySQL, numerous npm packages
+- **Infrastructure**: Requires MySQL in dev and prod
 - **Complexity**: Introduces monorepo tooling (turborepo or nx)
 
 ### Migration Required
@@ -106,7 +106,7 @@ Complete Prisma schema including:
 ### Performance Considerations
 - Database indexes planned for common queries (book_id, user_id, occurred_on)
 - Connection pooling configured in Prisma
-- Redis caching strategy defined
+- In-memory caching for session tokens (stateless JWT)
 
 ### Security Considerations
 - All passwords/secrets in environment variables
@@ -168,7 +168,7 @@ None yet.
 2. ✅ Next.js app with basic landing page and login flow
 3. ✅ NestJS API with health check and auth endpoints
 4. ✅ Complete Prisma schema with initial migration
-5. ✅ PostgreSQL and Redis running in docker-compose
+5. ✅ MySQL running in docker-compose
 6. ✅ Magic link authentication working end-to-end
 7. ✅ CI pipeline passing (lint, type-check, build)
 8. ✅ OpenAPI documentation accessible at `/api/docs`

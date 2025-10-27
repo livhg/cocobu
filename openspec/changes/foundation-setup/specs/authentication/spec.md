@@ -89,9 +89,9 @@ The system SHALL automatically create user accounts when first logging in with a
 - **AND** a new session SHALL be created
 
 ### Requirement: Rate Limiting
-The system SHALL rate-limit magic link requests to prevent abuse.
+The system SHALL rate-limit magic link requests to prevent abuse using database-backed counters.
 
-**Rationale**: Prevents email flooding attacks and protects email quota.
+**Rationale**: Prevents email flooding attacks and protects email quota without requiring Redis.
 
 #### Scenario: User requests multiple magic links
 - **GIVEN** a user has requested 2 magic links in the past hour
@@ -176,16 +176,17 @@ The system SHALL send magic link emails using SMTP configuration.
 - **AND** the user SHALL see a message "Unable to send email, please try again"
 
 ### Requirement: Token Storage
-The system SHALL use Redis to track used magic link tokens.
+The system SHALL use the database to track used magic link tokens.
 
-**Rationale**: Prevents token reuse attacks by maintaining a blacklist of used tokens.
+**Rationale**: Prevents token reuse attacks by maintaining a record of used tokens without requiring additional infrastructure.
 
 #### Scenario: Magic link token is used
 - **GIVEN** a user clicks a valid magic link
 - **WHEN** the token is validated
-- **THEN** the token ID SHALL be stored in Redis
-- **AND** the Redis entry SHALL expire after 15 minutes (token TTL)
+- **THEN** the token ID SHALL be stored in the database
+- **AND** the database entry SHALL include an expiry timestamp (15 minutes from creation)
 - **AND** subsequent attempts to use the same token SHALL be rejected
+- **AND** expired token records SHALL be cleaned up periodically
 
 ### Requirement: Development Mode Auth
 The system SHALL support a development-only auth bypass for testing.
