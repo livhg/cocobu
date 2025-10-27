@@ -106,7 +106,7 @@ Complete Prisma schema including:
 ### Performance Considerations
 - Database indexes planned for common queries (book_id, user_id, occurred_on)
 - Connection pooling configured in Prisma
-- In-memory caching for session tokens (stateless JWT)
+- Stateless JWTs for sessions, removing the need for server-side caching
 
 ### Security Considerations
 - All passwords/secrets in environment variables

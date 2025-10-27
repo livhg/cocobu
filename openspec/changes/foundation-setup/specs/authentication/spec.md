@@ -186,7 +186,7 @@ The system SHALL use the database to track used magic link tokens.
 - **THEN** the token ID SHALL be stored in the database
 - **AND** the database entry SHALL include an expiry timestamp (15 minutes from creation)
 - **AND** subsequent attempts to use the same token SHALL be rejected
-- **AND** expired token records SHALL be cleaned up periodically
+- **AND** expired token records SHALL be cleaned up periodically by a scheduled background job
 
 ### Requirement: Development Mode Auth
 The system SHALL support a development-only auth bypass for testing.

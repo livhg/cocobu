@@ -202,7 +202,7 @@ Category (categories)
 4. **Soft Deletes**: Not in MVP (can add later with `deleted_at` field)
 5. **Optimistic Locking**: `version` field on entries to handle concurrent edits
 6. **Self-Referential Mirror**: `source_entry_id` links mirror entries to original split entries
-7. **JSON Storage**: Use TEXT with JSON validation for Settlement payload in MySQL
+7. **JSON Storage**: Use MySQL 8.0 native JSON type for Settlement payload
 
 ### 3. Authentication Flow
 
@@ -478,7 +478,7 @@ const prisma = new PrismaClient({
 
 ### Caching Strategy
 
-- **In-Memory**: Rate limit counters stored in database table with TTL cleanup
+- **Database-backed**: Rate limit counters stored in database table with TTL cleanup
 - **TanStack Query**: Client-side cache with 5min stale time
 - **Next.js**: Static generation for landing pages
 - **Stateless JWT**: No server-side session storage needed
