@@ -95,12 +95,12 @@
 ## Phase 3: Docker Compose for Local Development
 
 ### Task 3.1: Create docker-compose.yml
-- [ ] Define PostgreSQL 15 service on port 5432
-- [ ] Define Redis 7 service on port 6379
+- [ ] Define MySQL 8.0 service on port 3306
 - [ ] Configure persistent volumes for data
 - [ ] Set up environment variables for credentials
+- [ ] Configure MySQL character set (utf8mb4) and collation
 
-**Validation**: `docker-compose up -d` starts both services
+**Validation**: `docker-compose up -d` starts MySQL service
 
 ### Task 3.2: Create development environment template
 - [ ] Create `.env.example` files for all apps
@@ -157,8 +157,8 @@
 ### Task 4.6: Implement auth module - Token verification
 - [ ] Implement `GET /auth/verify` endpoint
 - [ ] Validate magic link token signature and expiry
-- [ ] Check token hasn't been used (Redis lookup)
-- [ ] Mark token as used in Redis (15min TTL)
+- [ ] Check token hasn't been used (database lookup)
+- [ ] Mark token as used in database (with expiry timestamp)
 - [ ] Create or retrieve user by email
 - [ ] Generate session JWT token (7 day expiry)
 - [ ] Set HTTP-only, secure cookie
@@ -175,10 +175,11 @@
 **Validation**: Protected endpoints reject unauthenticated requests
 
 ### Task 4.8: Implement rate limiting
-- [ ] Install rate limiting dependencies (Redis-based)
-- [ ] Create `RateLimitGuard` with configurable thresholds
+- [ ] Create `RateLimitGuard` with database-backed counter
+- [ ] Create database table for rate limit tracking (email, count, window_start)
 - [ ] Apply rate limit to auth endpoints (3 per email per hour)
 - [ ] Return 429 status with retry-after header
+- [ ] Add cleanup job for expired rate limit records
 
 **Validation**: Exceeding 3 login requests in 1 hour returns 429 error
 
@@ -325,9 +326,8 @@
 
 ### Task 6.4: Add test job with services
 - [ ] Create `test` job
-- [ ] Configure PostgreSQL service container
-- [ ] Configure Redis service container
-- [ ] Set DATABASE_URL and REDIS_URL env vars
+- [ ] Configure MySQL service container
+- [ ] Set DATABASE_URL env var
 - [ ] Run migrations in test database
 - [ ] Run `npm run test`
 - [ ] Upload coverage reports

@@ -105,22 +105,21 @@ The system SHALL verify that all apps build successfully on every push and pull 
 - **AND** the build logs SHALL indicate which package failed
 
 ### Requirement: Test Database Setup
-The system SHALL provision PostgreSQL and Redis for CI test runs.
+The system SHALL provision MySQL for CI test runs.
 
 **Rationale**: Integration tests need real database instances to run properly.
 
 #### Scenario: CI test services are started
 - **GIVEN** the CI pipeline is running tests
 - **WHEN** the test job starts
-- **THEN** a PostgreSQL 15 container SHALL be started
-- **AND** a Redis 7 container SHALL be started
-- **AND** the services SHALL be accessible to test processes
+- **THEN** a MySQL 8.0 container SHALL be started
+- **AND** the service SHALL be accessible to test processes
 - **AND** migrations SHALL be applied to the test database
 
 #### Scenario: Tests use test database
 - **GIVEN** integration tests are running
 - **WHEN** tests interact with the database
-- **THEN** data SHALL be written to the test PostgreSQL instance
+- **THEN** data SHALL be written to the test MySQL instance
 - **AND** data SHALL NOT affect production or development databases
 - **AND** the test database SHALL be destroyed after tests complete
 

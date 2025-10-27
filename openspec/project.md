@@ -28,15 +28,14 @@ A "same source, different views" expense tracking system for individuals and gro
 
 ### Backend
 - **Framework**: NestJS + TypeScript
-- **Database**: PostgreSQL with Prisma ORM
-- **Cache/Queue**: Redis + BullMQ (event processing)
+- **Database**: MySQL with Prisma ORM
 - **API**: OpenAPI/Swagger documentation
 - **Deployment**: Fly.io or Railway
 
 ### Infrastructure
 - **Storage**: Cloudflare R2 (receipts/attachments)
 - **Auth**: OIDC / Magic link
-- **Security**: TLS everywhere, encrypted PG fields (email, real name)
+- **Security**: TLS everywhere, encrypted MySQL fields (email, real name)
 
 ## Project Conventions
 
@@ -153,8 +152,7 @@ A "same source, different views" expense tracking system for individuals and gro
 ## External Dependencies
 
 ### Required Services
-- **PostgreSQL 14+**: Primary data store
-- **Redis 7+**: Caching and job queue
+- **MySQL 8.0+**: Primary data store
 - **Cloudflare R2**: Receipt/attachment storage (S3-compatible)
 - **OIDC Provider**: Auth0 / Clerk / similar for authentication
 
