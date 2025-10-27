@@ -6,10 +6,10 @@ services:
     container_name: cocobu-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
       MYSQL_DATABASE: cocobu
       MYSQL_USER: cocobu
-      MYSQL_PASSWORD: cocobu123
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-devpassword123}
     ports:
       - '3306:3306'
     volumes:
