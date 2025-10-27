@@ -1,0 +1,478 @@
+# Implementation Tasks: Foundation Setup
+
+## Phase 1: Monorepo Structure & Build System
+
+### Task 1.1: Initialize monorepo with npm workspaces
+- [ ] Create root `package.json` with workspaces config
+- [ ] Set up `apps/` and `packages/` directories
+- [ ] Configure npm workspace scripts (dev, build, test, lint)
+- [ ] Verify `npm install` works from root
+
+**Validation**: `npm install` completes without errors, workspaces are recognized
+
+### Task 1.2: Install and configure Turborepo
+- [ ] Install `turbo` as dev dependency
+- [ ] Create `turbo.json` with pipeline configuration
+- [ ] Define task dependencies (build, lint, typecheck, test)
+- [ ] Configure caching strategy
+
+**Validation**: `npm run build` uses Turborepo and shows cache hits on second run
+
+### Task 1.3: Configure ESLint and Prettier
+- [ ] Install ESLint and Prettier at root level
+- [ ] Create `.eslintrc.js` with TypeScript rules
+- [ ] Create `.prettierrc.js` with formatting rules
+- [ ] Add `.eslintignore` and `.prettierignore`
+- [ ] Add lint and format scripts to root package.json
+
+**Validation**: `npm run lint` checks all packages, `npm run format` formats all files
+
+### Task 1.4: Set up TypeScript configuration
+- [ ] Create root `tsconfig.json` with base config
+- [ ] Create `tsconfig.base.json` for shared settings
+- [ ] Configure path aliases for packages
+- [ ] Enable strict mode
+
+**Validation**: `npm run typecheck` compiles all packages without errors
+
+## Phase 2: Database Schema & Prisma
+
+### Task 2.1: Create database package structure
+- [ ] Create `packages/database/` directory
+- [ ] Initialize npm package with `package.json`
+- [ ] Install Prisma dependencies
+- [ ] Create `prisma/` directory
+
+**Validation**: Package is recognized by workspace
+
+### Task 2.2: Define Prisma schema - Core models
+- [ ] Create `schema.prisma` with datasource and generator config
+- [ ] Define User model with encrypted fields
+- [ ] Define Book model with type enum
+- [ ] Define Membership model with role enum
+- [ ] Add relationships between User, Book, and Membership
+
+**Validation**: `prisma format` succeeds, no syntax errors
+
+### Task 2.3: Define Prisma schema - Transaction models
+- [ ] Define Entry model with optimistic locking (version field)
+- [ ] Define Split model with mode enum
+- [ ] Define Allocation model with conditional fields
+- [ ] Define Settlement model with JSONB payload
+- [ ] Define Category model
+- [ ] Add all relationships and foreign keys
+
+**Validation**: `prisma format` succeeds, `prisma validate` passes
+
+### Task 2.4: Add database indexes
+- [ ] Add index on `entries(book_id, occurred_on DESC)`
+- [ ] Add index on `entries(creator_id)`
+- [ ] Add index on `entries(source_entry_id)`
+- [ ] Add index on `memberships(user_id)`
+- [ ] Add index on `memberships(book_id)`
+- [ ] Add index on `allocations(split_id)`
+- [ ] Add index on `allocations(user_id)`
+- [ ] Add unique constraint on `memberships(book_id, user_id)`
+
+**Validation**: Schema includes all specified indexes
+
+### Task 2.5: Create initial migration
+- [ ] Run `prisma migrate dev --name init`
+- [ ] Verify migration SQL is generated
+- [ ] Review migration for correctness
+- [ ] Test migration applies cleanly
+
+**Validation**: Migration creates all tables and constraints without errors
+
+### Task 2.6: Export Prisma client
+- [ ] Create `src/index.ts` that exports Prisma client
+- [ ] Configure client generation
+- [ ] Add npm scripts: `db:generate`, `db:migrate:dev`, `db:migrate:deploy`, `db:reset`
+- [ ] Generate client with `prisma generate`
+
+**Validation**: `@cocobu/database` package can be imported in other packages
+
+## Phase 3: Docker Compose for Local Development
+
+### Task 3.1: Create docker-compose.yml
+- [ ] Define PostgreSQL 15 service on port 5432
+- [ ] Define Redis 7 service on port 6379
+- [ ] Configure persistent volumes for data
+- [ ] Set up environment variables for credentials
+
+**Validation**: `docker-compose up -d` starts both services
+
+### Task 3.2: Create development environment template
+- [ ] Create `.env.example` files for all apps
+- [ ] Document required environment variables
+- [ ] Add setup instructions to README
+
+**Validation**: Developer can copy `.env.example` to `.env` and start services
+
+## Phase 4: NestJS Backend
+
+### Task 4.1: Initialize NestJS application
+- [ ] Create `apps/api/` directory
+- [ ] Install NestJS CLI and dependencies
+- [ ] Generate new NestJS app structure
+- [ ] Configure TypeScript with strict mode
+- [ ] Set up src directory structure (auth, users, books, common modules)
+
+**Validation**: `npm run dev` starts NestJS app on port 4000
+
+### Task 4.2: Configure Prisma in NestJS
+- [ ] Create `PrismaService` extending Prisma Client
+- [ ] Implement `onModuleInit` and `enableShutdownHooks`
+- [ ] Create `PrismaModule` and export `PrismaService`
+- [ ] Add `@cocobu/database` as dependency
+
+**Validation**: Prisma client is injectable in NestJS services
+
+### Task 4.3: Set up OpenAPI/Swagger
+- [ ] Install `@nestjs/swagger` dependencies
+- [ ] Configure Swagger module in `main.ts`
+- [ ] Enable Swagger UI at `/api/docs`
+- [ ] Add API metadata (title, description, version)
+
+**Validation**: Swagger UI is accessible at `http://localhost:4000/api/docs`
+
+### Task 4.4: Create common utilities
+- [ ] Create response interceptor for standardized format
+- [ ] Create HTTP exception filter
+- [ ] Create validation pipe with class-validator
+- [ ] Configure CORS for frontend URL
+
+**Validation**: API returns consistent response format
+
+### Task 4.5: Implement auth module - Magic link generation
+- [ ] Create `AuthModule`, `AuthController`, `AuthService`
+- [ ] Install `@nestjs/jwt` and `nodemailer` dependencies
+- [ ] Implement `POST /auth/login` endpoint
+- [ ] Generate magic link JWT token (15min expiry)
+- [ ] Send email with magic link
+- [ ] Create email template (plain text for MVP)
+
+**Validation**: Magic link email is sent when requesting login
+
+### Task 4.6: Implement auth module - Token verification
+- [ ] Implement `GET /auth/verify` endpoint
+- [ ] Validate magic link token signature and expiry
+- [ ] Check token hasn't been used (Redis lookup)
+- [ ] Mark token as used in Redis (15min TTL)
+- [ ] Create or retrieve user by email
+- [ ] Generate session JWT token (7 day expiry)
+- [ ] Set HTTP-only, secure cookie
+- [ ] Redirect to frontend dashboard
+
+**Validation**: Clicking magic link creates session and redirects user
+
+### Task 4.7: Implement auth guards
+- [ ] Create `JwtAuthGuard` using `@nestjs/jwt`
+- [ ] Create `@CurrentUser()` decorator for extracting user
+- [ ] Implement token validation middleware
+- [ ] Configure JWT strategy with secret from env
+
+**Validation**: Protected endpoints reject unauthenticated requests
+
+### Task 4.8: Implement rate limiting
+- [ ] Install rate limiting dependencies (Redis-based)
+- [ ] Create `RateLimitGuard` with configurable thresholds
+- [ ] Apply rate limit to auth endpoints (3 per email per hour)
+- [ ] Return 429 status with retry-after header
+
+**Validation**: Exceeding 3 login requests in 1 hour returns 429 error
+
+### Task 4.9: Create users module (stub)
+- [ ] Create `UsersModule`, `UsersController`, `UsersService`
+- [ ] Implement `GET /users/me` endpoint (requires auth)
+- [ ] Return current user profile
+
+**Validation**: `GET /users/me` returns authenticated user's data
+
+### Task 4.10: Create books module (stub)
+- [ ] Create `BooksModule`, `BooksController`, `BooksService`
+- [ ] Create DTOs: `CreateBookDto`, `BookResponseDto`
+- [ ] Implement `GET /books` endpoint (list user's books)
+- [ ] Implement `POST /books` endpoint (create book)
+- [ ] Add basic authorization (user can only access their books)
+
+**Validation**: User can create and list their books via API
+
+### Task 4.11: Add development-only auth bypass
+- [ ] Create `DevAuthController` with `@SkipAuth()` decorator
+- [ ] Implement `GET /auth/dev-login` endpoint
+- [ ] Only enable in development mode (check NODE_ENV)
+- [ ] Generate session without email
+
+**Validation**: `/auth/dev-login?email=test@example.com` creates session in dev mode
+
+## Phase 5: Next.js Frontend
+
+### Task 5.1: Initialize Next.js application
+- [ ] Create `apps/web/` directory
+- [ ] Install Next.js 14+ with App Router
+- [ ] Configure TypeScript
+- [ ] Set up src directory with app router structure
+- [ ] Create basic layout
+
+**Validation**: `npm run dev` starts Next.js app on port 3000
+
+### Task 5.2: Install and configure Tailwind CSS
+- [ ] Install Tailwind CSS and dependencies
+- [ ] Create `tailwind.config.js`
+- [ ] Import Tailwind in global CSS
+- [ ] Configure Tailwind content paths
+
+**Validation**: Tailwind classes work in components
+
+### Task 5.3: Install and configure Radix UI
+- [ ] Install core Radix UI primitives
+- [ ] Create UI components directory
+- [ ] Create basic Button, Input, Card components
+- [ ] Style with Tailwind
+
+**Validation**: Radix components render correctly
+
+### Task 5.4: Set up API client
+- [ ] Create `lib/api/client.ts` with fetch wrapper
+- [ ] Configure base URL from environment variable
+- [ ] Add request/response interceptors
+- [ ] Handle authentication cookies
+
+**Validation**: API client can make requests to backend
+
+### Task 5.5: Configure TanStack Query
+- [ ] Install `@tanstack/react-query`
+- [ ] Create query client provider
+- [ ] Wrap app with `QueryClientProvider`
+- [ ] Configure devtools in development
+
+**Validation**: React Query devtools visible in browser
+
+### Task 5.6: Create Zustand auth store
+- [ ] Install `zustand`
+- [ ] Create auth store with user state
+- [ ] Add setUser, logout actions
+- [ ] Create useAuth hook
+
+**Validation**: Auth state is accessible in components
+
+### Task 5.7: Implement login page
+- [ ] Create `app/(auth)/login/page.tsx`
+- [ ] Create login form with email input
+- [ ] Handle form submission
+- [ ] Call `POST /auth/login` API
+- [ ] Show success message
+
+**Validation**: Submitting email shows "Check your email" message
+
+### Task 5.8: Implement verify page
+- [ ] Create `app/(auth)/verify/page.tsx`
+- [ ] Extract token from query params
+- [ ] Call `GET /auth/verify` with token
+- [ ] Handle success (redirect to dashboard)
+- [ ] Handle errors (expired, used, invalid)
+
+**Validation**: Valid magic link redirects to dashboard
+
+### Task 5.9: Create protected layout
+- [ ] Create `app/(dashboard)/layout.tsx`
+- [ ] Add auth check (redirect to login if unauthenticated)
+- [ ] Fetch current user with `GET /users/me`
+- [ ] Show basic navigation (logout button)
+
+**Validation**: Unauthenticated users are redirected to login
+
+### Task 5.10: Create dashboard page
+- [ ] Create `app/(dashboard)/page.tsx`
+- [ ] Fetch books with `GET /books`
+- [ ] Display list of books
+- [ ] Add "Create Book" button (stub)
+
+**Validation**: Authenticated users see their books
+
+### Task 5.11: Create landing page
+- [ ] Create `app/page.tsx` as landing page
+- [ ] Add project description and CTA
+- [ ] Link to login page
+
+**Validation**: Root path shows landing page
+
+## Phase 6: CI/CD Pipeline
+
+### Task 6.1: Create CI workflow file
+- [ ] Create `.github/workflows/ci.yml`
+- [ ] Define workflow trigger (push, pull_request)
+- [ ] Set up Node.js environment (setup-node action)
+
+**Validation**: Workflow file is syntactically valid
+
+### Task 6.2: Add linting job
+- [ ] Create `lint` job
+- [ ] Install dependencies with cache
+- [ ] Run `npm run lint`
+- [ ] Report status to pull request
+
+**Validation**: Lint job runs and reports status
+
+### Task 6.3: Add type checking job
+- [ ] Create `typecheck` job
+- [ ] Install dependencies with cache
+- [ ] Run `npm run typecheck`
+- [ ] Report status to pull request
+
+**Validation**: Type check job runs and reports status
+
+### Task 6.4: Add test job with services
+- [ ] Create `test` job
+- [ ] Configure PostgreSQL service container
+- [ ] Configure Redis service container
+- [ ] Set DATABASE_URL and REDIS_URL env vars
+- [ ] Run migrations in test database
+- [ ] Run `npm run test`
+- [ ] Upload coverage reports
+
+**Validation**: Tests run against real database in CI
+
+### Task 6.5: Add build job
+- [ ] Create `build` job
+- [ ] Install dependencies with cache
+- [ ] Run `npm run build`
+- [ ] Verify all packages build successfully
+
+**Validation**: Build job completes without errors
+
+### Task 6.6: Add security scanning
+- [ ] Create `security` job
+- [ ] Run `npm audit`
+- [ ] Fail on high/critical vulnerabilities
+- [ ] Upload security report
+
+**Validation**: Security scan runs and reports vulnerabilities
+
+### Task 6.7: Configure dependency caching
+- [ ] Add cache action for node_modules
+- [ ] Use package-lock.json as cache key
+- [ ] Verify cache hit on subsequent runs
+
+**Validation**: Second CI run uses cached dependencies
+
+### Task 6.8: Configure branch protection
+- [ ] Enable required status checks on main branch
+- [ ] Require CI jobs to pass before merge
+- [ ] Document in repository settings
+
+**Validation**: Pull requests require passing CI to merge
+
+## Phase 7: Documentation & Final Testing
+
+### Task 7.1: Write README
+- [ ] Add project overview and description
+- [ ] Document tech stack
+- [ ] Add prerequisites (Node.js, Docker)
+- [ ] Write step-by-step setup instructions
+- [ ] Document environment variables
+- [ ] Add development workflow (dev, build, test)
+- [ ] Add troubleshooting section
+
+**Validation**: New developer can follow README to set up project
+
+### Task 7.2: Create sample data script
+- [ ] Create seed script in database package
+- [ ] Generate sample users
+- [ ] Generate sample books (personal and split)
+- [ ] Generate sample entries
+- [ ] Add script to package.json (`db:seed`)
+
+**Validation**: `npm run db:seed` populates test data
+
+### Task 7.3: End-to-end testing
+- [ ] Clone repo to fresh directory
+- [ ] Follow README setup instructions
+- [ ] Run `docker-compose up -d`
+- [ ] Run `npm install`
+- [ ] Run migrations
+- [ ] Seed database
+- [ ] Start dev servers
+- [ ] Test login flow end-to-end
+- [ ] Test creating a book
+
+**Validation**: Complete user flow works from scratch
+
+### Task 7.4: Documentation review
+- [ ] Review all code comments
+- [ ] Ensure API endpoints are documented in Swagger
+- [ ] Add JSDoc comments to key functions
+- [ ] Document known limitations
+
+**Validation**: Documentation is clear and accurate
+
+### Task 7.5: Performance baseline
+- [ ] Measure CI pipeline duration
+- [ ] Measure app startup time
+- [ ] Check bundle sizes
+- [ ] Document baseline metrics
+
+**Validation**: CI completes in <5 minutes, apps start in <10 seconds
+
+## Phase 8: Validation & Cleanup
+
+### Task 8.1: Run OpenSpec validation
+- [ ] Run `openspec validate foundation-setup --strict`
+- [ ] Fix any validation errors
+- [ ] Ensure all requirements have scenarios
+
+**Validation**: `openspec validate` passes without errors
+
+### Task 8.2: Security audit
+- [ ] Run `npm audit` and fix critical vulnerabilities
+- [ ] Review auth implementation for security issues
+- [ ] Verify cookies are HTTP-only and secure
+- [ ] Verify rate limiting works
+- [ ] Test JWT expiration handling
+
+**Validation**: Zero high/critical vulnerabilities, auth is secure
+
+### Task 8.3: Code review checklist
+- [ ] Review TypeScript strict mode compliance
+- [ ] Review error handling in all modules
+- [ ] Review API response formats
+- [ ] Review database schema and indexes
+- [ ] Review environment variable usage
+
+**Validation**: Code follows all conventions from `openspec/project.md`
+
+### Task 8.4: Update tasks.md
+- [ ] Mark all completed tasks as done
+- [ ] Document any deviations from plan
+- [ ] Note any follow-up items for future changes
+
+**Validation**: tasks.md accurately reflects implementation status
+
+---
+
+## Dependencies Between Tasks
+
+**Parallel work opportunities:**
+- Phase 1 (Monorepo) can be done independently
+- Phase 2 (Database) can start as soon as Phase 1.1-1.2 complete
+- Phase 3 (Docker) can be done independently
+- Phase 4 (Backend) requires Phase 2 complete
+- Phase 5 (Frontend) requires Phase 4.4 and 4.9 for API integration
+- Phase 6 (CI/CD) can start as soon as Phase 1 complete
+
+**Critical path:**
+Phase 1 → Phase 2 → Phase 4 (Auth) → Phase 5 (Auth pages) → Phase 7 (E2E testing)
+
+## Estimated Timeline
+
+- **Phase 1**: 3-4 hours
+- **Phase 2**: 4-5 hours
+- **Phase 3**: 1 hour
+- **Phase 4**: 8-10 hours
+- **Phase 5**: 6-8 hours
+- **Phase 6**: 3-4 hours
+- **Phase 7**: 2-3 hours
+- **Phase 8**: 2 hours
+
+**Total**: ~29-37 hours (3-5 days for experienced developer)
