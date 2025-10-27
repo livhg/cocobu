@@ -151,7 +151,7 @@ The system SHALL store settlement snapshots with period and computed balances.
 - **GIVEN** a split book has entries over a period
 - **WHEN** a settlement is created for the period
 - **THEN** the settlement SHALL store period_start and period_end dates
-- **AND** the payload (TEXT with JSON) SHALL contain net balances per user
+- **AND** the payload (JSON) SHALL contain net balances per user
 - **AND** the payload SHALL contain minimum transfer paths
 - **AND** the created_at timestamp SHALL be recorded
 
