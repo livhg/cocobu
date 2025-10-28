@@ -1,4 +1,12 @@
-import { Controller, Post, Get, Body, Query, Res, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Query,
+  Res,
+  HttpCode,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -18,7 +26,11 @@ export class AuthController {
    * @param token JWT session token
    * @param forceInsecure Force secure flag to false (for dev-only endpoints)
    */
-  private setSessionCookie(response: Response, token: string, forceInsecure = false): void {
+  private setSessionCookie(
+    response: Response,
+    token: string,
+    forceInsecure = false
+  ): void {
     response.cookie('session', token, {
       httpOnly: true,
       secure: forceInsecure ? false : process.env.NODE_ENV === 'production',
@@ -42,7 +54,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid or expired token' })
   async verify(
     @Query('token') token: string,
-    @Res({ passthrough: true }) response: Response,
+    @Res({ passthrough: true }) response: Response
   ) {
     const result = await this.authService.verify(token);
     this.setSessionCookie(response, result.accessToken);
@@ -50,12 +62,17 @@ export class AuthController {
   }
 
   @Get('dev-login')
-  @ApiOperation({ summary: 'Development-only: Login without email (bypass magic link)' })
+  @ApiOperation({
+    summary: 'Development-only: Login without email (bypass magic link)',
+  })
   @ApiResponse({ status: 200, description: 'Login successful' })
-  @ApiResponse({ status: 400, description: 'Only available in development mode' })
+  @ApiResponse({
+    status: 400,
+    description: 'Only available in development mode',
+  })
   async devLogin(
     @Query('email') email: string,
-    @Res({ passthrough: true }) response: Response,
+    @Res({ passthrough: true }) response: Response
   ) {
     const result = await this.authService.devLogin(email);
     this.setSessionCookie(response, result.accessToken, true);

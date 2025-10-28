@@ -27,8 +27,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const errorResponse = {
       error: {
         code: this.getErrorCode(exception),
-        message: typeof message === 'string' ? message : (message as any).message,
-        details: typeof message === 'object' ? (message as any).error : undefined,
+        message:
+          typeof message === 'string'
+            ? message
+            : (message as { message?: string }).message || 'An error occurred',
+        details:
+          typeof message === 'object'
+            ? (message as { error?: string }).error
+            : undefined,
       },
       meta: {
         timestamp: new Date().toISOString(),

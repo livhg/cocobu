@@ -1,4 +1,11 @@
-import { IsString, IsEnum, IsOptional, MinLength, MaxLength, Length } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  MinLength,
+  MaxLength,
+  Length,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 // Define BookType enum locally to match Prisma schema
