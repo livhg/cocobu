@@ -7,5 +7,5 @@ export class LoginDto {
     description: 'User email address',
   })
   @IsEmail()
-  email: string;
+  email!: string;
 }

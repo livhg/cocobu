@@ -13,7 +13,7 @@ export class CreateBookDto {
     enum: BookType,
   })
   @IsEnum(BookType)
-  type: BookType;
+  type!: BookType;
 
   @ApiProperty({
     example: '我的帳本',
@@ -22,7 +22,7 @@ export class CreateBookDto {
   @IsString()
   @MinLength(1)
   @MaxLength(255)
-  name: string;
+  name!: string;
 
   @ApiProperty({
     example: 'TWD',
