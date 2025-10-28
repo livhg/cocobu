@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
-import { api } from '@/lib/api';
+import { api, type User } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -21,7 +21,7 @@ export default function DashboardLayout({
       if (!isAuthenticated) {
         // Try to fetch current user
         try {
-          const response = await api.get<{ user: any }>('/users/me');
+          const response = await api.get<{ user: User }>('/users/me');
           setUser(response.user);
         } catch {
           // Not authenticated, redirect to login

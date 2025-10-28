@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -29,7 +29,15 @@ export default function LoginPage() {
       await api.post('/auth/login', { email });
       setIsSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '登入失敗，請稍後再試');
+      if (err instanceof ApiError) {
+        // Extract detailed error message from backend
+        const message = err.body?.message || err.body?.error || err.statusText;
+        setError(message || '登入失敗，請稍後再試');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('登入失敗，請稍後再試');
+      }
     } finally {
       setIsLoading(false);
     }

@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -10,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { api } from '@/lib/api';
+import { api, ApiError, type User } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth-store';
 import Link from 'next/link';
 
@@ -32,21 +33,28 @@ function VerifyContent() {
       return;
     }
 
+    let timeoutId: NodeJS.Timeout;
+
     const verifyToken = async () => {
       try {
-        const response = await api.get<{ user: any }>(
+        const response = await api.get<{ user: User }>(
           `/auth/verify?token=${token}`
         );
         setUser(response.user);
         setStatus('success');
 
         // Redirect to dashboard after a brief delay
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           router.push('/dashboard');
         }, 1500);
       } catch (err) {
         setStatus('error');
-        if (err instanceof Error) {
+        if (err instanceof ApiError) {
+          // Extract detailed error message from backend
+          const message =
+            err.body?.message || err.body?.error || err.statusText;
+          setError(message || '驗證失敗，請重新登入');
+        } else if (err instanceof Error) {
           setError(err.message);
         } else {
           setError('驗證失敗，請重新登入');
@@ -55,6 +63,13 @@ function VerifyContent() {
     };
 
     verifyToken();
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [token, router, setUser]);
 
   if (status === 'loading') {
@@ -85,19 +100,7 @@ function VerifyContent() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-center py-8">
-              <svg
-                className="h-16 w-16 text-green-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
+              <CheckCircle2 className="h-16 w-16 text-green-500" />
             </div>
           </CardContent>
         </Card>
