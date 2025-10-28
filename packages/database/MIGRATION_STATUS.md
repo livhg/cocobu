@@ -2,7 +2,7 @@
 
 ## ✅ Completed
 
-1. **Migration SQL Created**: `prisma/migrations/20251028_init/migration.sql`
+1. **Migration SQL Created**: `prisma/migrations/20251028000000_init/migration.sql`
    - All 10 tables defined: users, books, memberships, entries, splits, allocations, settlements, categories, magic_link_tokens, rate_limits
    - All indexes and foreign keys included
    - MySQL-specific syntax with utf8mb4 collation
@@ -50,7 +50,13 @@ railway run npm run db:generate -w @cocobu/database
 If you have direct MySQL access:
 
 ```bash
-mysql -h <host> -u <user> -p<password> <database> < prisma/migrations/20251028_init/migration.sql
+# Option A: Prompt for password (recommended - avoids shell history)
+mysql -h <host> -u <user> -p <database> < prisma/migrations/20251028000000_init/migration.sql
+
+# Option B: Use environment variable
+export MYSQL_PWD='your_password'
+mysql -h <host> -u <user> <database> < prisma/migrations/20251028000000_init/migration.sql
+unset MYSQL_PWD  # Clear password from environment after use
 ```
 
 ## Verification
@@ -64,7 +70,7 @@ SHOW TABLES;
 --              _prisma_migrations
 
 SELECT * FROM _prisma_migrations;
--- Should show one row for migration: 20251028_init
+-- Should show one row for migration: 20251028000000_init
 ```
 
 ## Build Requirement
@@ -76,6 +82,39 @@ Before building the `@cocobu/database` package or `@cocobu/api` app:
 
 ## Current Schema Version
 
-- Migration: `20251028_init`
+- Migration: `20251028000000_init`
 - Schema: `packages/database/prisma/schema.prisma`
 - Engine Type: `library` (WASM-based for environments with limited network)
+
+## Future Optimizations
+
+### UUID Storage Optimization
+
+**Current Implementation**: UUIDs stored as `CHAR(36)` (e.g., "550e8400-e29b-41d4-a716-446655440000")
+
+**Potential Optimization**: Use `BINARY(16)` with MySQL 8.0+ UUID functions
+```sql
+-- Example for future migration:
+-- Instead of: `id` CHAR(36)
+-- Use: `id` BINARY(16)
+--
+-- With functions: UUID_TO_BIN(uuid, 1) and BIN_TO_UUID(binary, 1)
+```
+
+**Benefits**:
+- 55% storage reduction (16 bytes vs 36 bytes)
+- Better index performance due to smaller key size
+- Reduced memory footprint for index pages
+
+**Trade-offs**:
+- Requires MySQL 8.0+
+- Less human-readable in raw queries
+- Needs application-level conversion functions
+- Prisma doesn't natively support BINARY UUIDs (requires custom types)
+
+**Decision**: Keep `CHAR(36)` for MVP. Consider optimization if:
+- Performance profiling shows UUID index bottlenecks
+- Database size exceeds 100GB
+- Query performance degrades on UUID lookups
+
+**Note**: This would require a schema migration and is not backward compatible.
