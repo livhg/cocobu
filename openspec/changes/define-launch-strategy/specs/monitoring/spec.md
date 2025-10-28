@@ -134,7 +134,6 @@ The system SHALL implement structured logging with appropriate log levels and re
 - **GIVEN** application runs in different environments
 - **WHEN** LOG_LEVEL environment variable is set
 - **THEN** production SHALL log INFO and above
-- **AND** staging SHALL log DEBUG and above
 - **AND** development SHALL log DEBUG and above
 - **AND** lower-level logs SHALL be filtered out
 
@@ -210,12 +209,21 @@ The system SHALL configure alerts for critical conditions requiring immediate re
 - **AND** alert SHALL indicate risk of container restart
 - **AND** team SHALL investigate memory leak or scale up
 
-#### Scenario: Database connection alert
+#### Scenario: Database connection pool alert
+- **GIVEN** backend connects to MySQL with limited connection pool (5 connections on Railway free tier)
+- **WHEN** connection pool utilization exceeds 80% for 5 minutes
+- **THEN** monitoring SHALL trigger connection pool warning alert
+- **AND** alert SHALL include current pool utilization percentage
+- **AND** alert SHALL include waiting requests count
+- **AND** team SHALL investigate high load or connection leaks
+
+#### Scenario: Connection pool exhaustion alert
 - **GIVEN** backend connects to MySQL
-- **WHEN** database connections are exhausted
-- **THEN** backend SHALL log critical error
-- **AND** Sentry SHALL capture connection errors
-- **AND** alert SHALL be sent for database connectivity issues
+- **WHEN** database connections are completely exhausted (100% utilization)
+- **THEN** backend SHALL log critical error with pool metrics
+- **AND** Sentry SHALL capture connection pool exhaustion errors
+- **AND** alert SHALL be sent immediately for database connectivity issues
+- **AND** alert SHALL include recommendation to upgrade Railway plan or optimize queries
 
 ### Requirement: User Analytics
 The system SHALL track basic usage metrics while respecting privacy-first principles (no third-party tracking scripts).
@@ -271,8 +279,8 @@ The system SHALL define incident response procedures for common failure scenario
 - **WHEN** bug affects multiple users
 - **THEN** team SHALL assess impact and severity
 - **AND** team SHALL decide: hotfix or rollback
-- **AND** hotfix SHALL be deployed to staging first
-- **AND** rollback SHALL use Vercel/Railway rollback features
+- **AND** hotfix SHALL be tested via PR preview deployment before production
+- **AND** rollback SHALL use Vercel/Railway rollback features for immediate mitigation
 
 #### Scenario: Incident postmortem
 - **GIVEN** incident is resolved

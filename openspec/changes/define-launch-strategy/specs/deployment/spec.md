@@ -1,7 +1,7 @@
 # Specification: Deployment
 
 ## Overview
-Defines the deployment architecture, platform selection, and configuration for frontend, backend, database, and storage services across development, staging, and production environments.
+Defines the deployment architecture, platform selection, and configuration for frontend, backend, database, and storage services across development and production environments. For MVP simplicity, staging environment is deferred to post-launch phase.
 
 ## ADDED Requirements
 
@@ -77,6 +77,33 @@ The system SHALL host MySQL 8.0 database on Railway with automatic backups and c
 - **THEN** Prisma SHALL maintain connection pool
 - **AND** pool size SHALL be limited to 5 connections (Railway free tier)
 - **AND** connections SHALL be reused across requests
+- **AND** pool timeout SHALL be configured to prevent connection exhaustion
+- **AND** query timeout SHALL be set to release connections promptly
+
+#### Scenario: Connection pool exhaustion detection
+- **GIVEN** connection pool is at capacity
+- **WHEN** new request attempts to acquire database connection
+- **THEN** request SHALL wait up to connection_timeout (default 10s)
+- **AND** if timeout is exceeded, request SHALL fail with 503 Service Unavailable
+- **AND** error SHALL be logged with connection pool metrics
+- **AND** Sentry SHALL capture connection pool exhaustion errors for alerting
+
+#### Scenario: Connection pool monitoring
+- **GIVEN** backend is serving requests
+- **WHEN** connection pool metrics are collected
+- **THEN** system SHALL track active connections count
+- **AND** system SHALL track waiting requests count
+- **AND** system SHALL track average connection acquisition time
+- **AND** metrics SHALL be exposed via health check endpoint `/health/db`
+- **AND** alerts SHALL trigger when pool utilization exceeds 80% for 5 minutes
+
+#### Scenario: Graceful degradation under load
+- **GIVEN** connection pool is near capacity (>80% utilization)
+- **WHEN** non-critical requests arrive
+- **THEN** system MAY defer or reject non-essential operations
+- **AND** critical operations (user auth, data retrieval) SHALL be prioritized
+- **AND** background jobs SHALL be paused when pool utilization >90%
+- **AND** user-facing error messages SHALL suggest retry or reduced load
 
 #### Scenario: Database backup
 - **GIVEN** database is running on Railway
@@ -139,7 +166,8 @@ The system SHALL maintain two isolated environments: development and production.
 - **WHEN** code is pushed to PR branch
 - **THEN** Vercel SHALL create preview deployment with unique URL
 - **AND** preview SHALL use production-like configuration
-- **AND** preview SHALL connect to production API for testing (or mock data)
+- **AND** preview SHALL use mock/demo data or read-only API access to prevent production data modification
+- **AND** preview frontend SHALL NOT perform write operations against production database
 - **AND** preview SHALL be destroyed when PR is closed
 
 ### Requirement: Health Checks

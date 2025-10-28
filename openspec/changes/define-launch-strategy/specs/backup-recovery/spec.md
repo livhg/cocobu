@@ -64,7 +64,7 @@ The system SHALL support database restoration from backups with minimal downtime
 #### Scenario: Partial data recovery
 - **GIVEN** only specific data needs recovery (e.g., accidentally deleted book)
 - **WHEN** administrator identifies affected records
-- **THEN** backup SHALL be restored to separate staging database
+- **THEN** backup SHALL be restored to temporary local or test database instance
 - **AND** specific records SHALL be extracted via SQL queries
 - **AND** records SHALL be re-imported to production database
 - **AND** data integrity SHALL be verified after import
@@ -72,7 +72,7 @@ The system SHALL support database restoration from backups with minimal downtime
 #### Scenario: Restoration testing
 - **GIVEN** backups are created regularly
 - **WHEN** quarterly restoration test is scheduled
-- **THEN** latest backup SHALL be restored to staging environment
+- **THEN** latest backup SHALL be restored to temporary test environment (local or temporary Railway instance)
 - **AND** application SHALL connect to restored database
 - **AND** smoke tests SHALL verify data integrity
 - **AND** test results SHALL be documented in runbook
@@ -301,7 +301,7 @@ The system SHALL conduct regular disaster recovery drills to validate procedures
 #### Scenario: Quarterly restore drill
 - **GIVEN** quarter ends
 - **WHEN** restore drill is scheduled
-- **THEN** team SHALL restore latest backup to staging environment
+- **THEN** team SHALL restore latest backup to temporary test environment (local or temporary Railway instance)
 - **AND** team SHALL time the restoration process
 - **AND** team SHALL verify application functionality with restored data
 - **AND** team SHALL document any issues encountered

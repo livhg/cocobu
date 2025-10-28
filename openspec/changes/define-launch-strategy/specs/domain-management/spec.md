@@ -136,9 +136,11 @@ The system SHALL configure Cross-Origin Resource Sharing (CORS) to allow fronten
 #### Scenario: Preview deployment CORS
 - **GIVEN** Vercel preview deployment is created
 - **WHEN** preview frontend requests API
-- **THEN** production API SHALL accept requests from Vercel preview domains
-- **AND** preview domain pattern SHALL be whitelisted: `*.vercel.app`
-- **AND** CORS SHALL allow credentials for authenticated requests
+- **THEN** production API SHALL accept requests from project-specific Vercel preview domains
+- **AND** preview domain pattern SHALL be whitelisted using strict pattern: `https://*-livhg.vercel.app` or `https://cocobu-*.vercel.app`
+- **AND** CORS SHALL NOT accept wildcards that permit arbitrary Vercel projects
+- **AND** CORS configuration SHALL validate origin against project/organization-specific pattern
+- **AND** preview requests SHALL use read-only mode to prevent production data modification
 
 #### Scenario: Unauthorized CORS request
 - **GIVEN** backend API is running
