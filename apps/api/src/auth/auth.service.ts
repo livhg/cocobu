@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../common/services/prisma.service';
 import { LoginDto } from './dto/login.dto';
+import { AUTH_CONSTANTS } from '../common/constants/auth.constants';
 import * as nodemailer from 'nodemailer';
 
 interface MagicLinkPayload {
@@ -60,13 +61,14 @@ export class AuthService {
       email,
     };
 
-    const token = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const token = this.jwtService.sign(payload, { expiresIn: AUTH_CONSTANTS.MAGIC_LINK_EXPIRY });
 
     // Store token for single-use validation
+    // TODO: Move to Redis for production (atomic operations and persistence)
     this.magicLinkTokens.set(token, {
       email,
       used: false,
-      expires: new Date(Date.now() + 15 * 60 * 1000),
+      expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
     });
 
     // Generate magic link URL
@@ -76,7 +78,7 @@ export class AuthService {
     // Send email
     if (process.env.NODE_ENV === 'production' && this.transporter) {
       await this.transporter.sendMail({
-        from: this.configService.get('SMTP_FROM') || 'noreply@cocobu.app',
+        from: this.configService.get('SMTP_FROM') || AUTH_CONSTANTS.DEFAULT_FROM_EMAIL,
         to: email,
         subject: 'CocoBu 登入連結 / Login Link',
         text: `
@@ -177,7 +179,7 @@ CocoBu 叩叩簿
       email: user.email,
     };
 
-    const sessionToken = this.jwtService.sign(sessionPayload, { expiresIn: '7d' });
+    const sessionToken = this.jwtService.sign(sessionPayload, { expiresIn: AUTH_CONSTANTS.SESSION_EXPIRY });
 
     return {
       accessToken: sessionToken,
