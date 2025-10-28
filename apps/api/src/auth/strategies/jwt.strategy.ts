@@ -15,7 +15,7 @@ interface JwtPayload {
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     configService: ConfigService,
-    private prisma: PrismaService,
+    private prisma: PrismaService
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([

@@ -49,7 +49,7 @@ export class BooksController {
   @ApiResponse({ status: 400, description: 'Invalid input' })
   async create(
     @CurrentUser() user: UserDto,
-    @Body() createBookDto: CreateBookDto,
+    @Body() createBookDto: CreateBookDto
   ) {
     return this.booksService.create(user.id, createBookDto);
   }

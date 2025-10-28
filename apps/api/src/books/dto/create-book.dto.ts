@@ -1,6 +1,19 @@
-import { IsString, IsEnum, IsOptional, MinLength, MaxLength, Length } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  MinLength,
+  MaxLength,
+  Length,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { BookType } from '@prisma/client';
+
+// Define BookType enum locally to match Prisma schema
+// This avoids circular dependency and works even if Prisma client isn't generated
+export enum BookType {
+  personal = 'personal',
+  split = 'split',
+}
 
 export class CreateBookDto {
   @ApiProperty({

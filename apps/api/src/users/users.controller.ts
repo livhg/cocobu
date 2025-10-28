@@ -1,5 +1,10 @@
 import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UsersService } from './users.service';
@@ -15,7 +20,10 @@ export class UsersController {
 
   @Get('me')
   @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'User profile retrieved successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getMe(@CurrentUser() user: UserDto) {
     return {
@@ -33,7 +41,7 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async updateMe(
     @CurrentUser() user: UserDto,
-    @Body() updateProfileDto: UpdateProfileDto,
+    @Body() updateProfileDto: UpdateProfileDto
   ) {
     return this.usersService.updateProfile(user.id, updateProfileDto);
   }

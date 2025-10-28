@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../common/services/prisma.service';
@@ -23,12 +28,13 @@ export class AuthService {
   private transporter: nodemailer.Transporter | null = null;
   // TODO: Move to Redis for production
   // Current in-memory storage will lose data on restart and doesn't work in multi-instance deployments
-  private magicLinkTokens: Map<string, { email: string; expires: Date }> = new Map();
+  private magicLinkTokens: Map<string, { email: string; expires: Date }> =
+    new Map();
 
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-    private configService: ConfigService,
+    private configService: ConfigService
   ) {
     // Initialize email transporter
     // For development, use ethereal.email (fake SMTP)
@@ -45,7 +51,9 @@ export class AuthService {
       });
     } else {
       // Development mode: log to console instead of sending email
-      this.logger.log('📧 Email service in development mode - emails will be logged to console');
+      this.logger.log(
+        '📧 Email service in development mode - emails will be logged to console'
+      );
     }
   }
 
@@ -61,7 +69,9 @@ export class AuthService {
       email,
     };
 
-    const token = this.jwtService.sign(payload, { expiresIn: AUTH_CONSTANTS.MAGIC_LINK_EXPIRY });
+    const token = this.jwtService.sign(payload, {
+      expiresIn: AUTH_CONSTANTS.MAGIC_LINK_EXPIRY,
+    });
 
     // Store token for single-use validation
     // TODO: Move to Redis for production (atomic operations and persistence)
@@ -71,13 +81,16 @@ export class AuthService {
     });
 
     // Generate magic link URL
-    const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:3000';
+    const frontendUrl =
+      this.configService.get('FRONTEND_URL') || 'http://localhost:3000';
     const magicLink = `${frontendUrl}/auth/verify?token=${token}`;
 
     // Send email
     if (process.env.NODE_ENV === 'production' && this.transporter) {
       await this.transporter.sendMail({
-        from: this.configService.get('SMTP_FROM') || AUTH_CONSTANTS.DEFAULT_FROM_EMAIL,
+        from:
+          this.configService.get('SMTP_FROM') ||
+          AUTH_CONSTANTS.DEFAULT_FROM_EMAIL,
         to: email,
         subject: 'CocoBu 登入連結 / Login Link',
         text: `
@@ -174,7 +187,9 @@ CocoBu 叩叩簿
       email: user.email,
     };
 
-    const sessionToken = this.jwtService.sign(sessionPayload, { expiresIn: AUTH_CONSTANTS.SESSION_EXPIRY });
+    const sessionToken = this.jwtService.sign(sessionPayload, {
+      expiresIn: AUTH_CONSTANTS.SESSION_EXPIRY,
+    });
 
     return {
       accessToken: sessionToken,
@@ -189,7 +204,9 @@ CocoBu 叩叩簿
   // Development-only: Direct login without email
   async devLogin(email: string) {
     if (process.env.NODE_ENV === 'production') {
-      throw new BadRequestException('Dev login is only available in development mode');
+      throw new BadRequestException(
+        'Dev login is only available in development mode'
+      );
     }
 
     return this.createSessionForUser(email);
