@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,13 +14,15 @@ import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth-store';
 import Link from 'next/link';
 
-export default function VerifyPage() {
+function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
   const setUser = useAuthStore((state) => state.setUser);
 
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
+    'loading'
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,7 +34,9 @@ export default function VerifyPage() {
 
     const verifyToken = async () => {
       try {
-        const response = await api.get<{ user: any }>(`/auth/verify?token=${token}`);
+        const response = await api.get<{ user: any }>(
+          `/auth/verify?token=${token}`
+        );
         setUser(response.user);
         setStatus('success');
 
@@ -131,5 +135,29 @@ export default function VerifyPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>載入中...</CardTitle>
+              <CardDescription>正在準備驗證頁面</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center py-8">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900"></div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      }
+    >
+      <VerifyContent />
+    </Suspense>
   );
 }

@@ -25,7 +25,10 @@ async function apiRequest<T>(
   endpoint: string,
   options: ApiRequestOptions = {}
 ): Promise<T> {
-  const baseUrl = options.baseUrl || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+  const baseUrl =
+    options.baseUrl ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    'http://localhost:4000';
   const url = `${baseUrl}${endpoint}`;
 
   const config: RequestInit = {
@@ -64,7 +67,9 @@ async function apiRequest<T>(
       throw error;
     }
     // Network errors or other fetch failures
-    throw new Error(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 

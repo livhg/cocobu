@@ -13,7 +13,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading, setUser, logout, setLoading } = useAuthStore();
+  const { user, isAuthenticated, isLoading, setUser, logout, setLoading } =
+    useAuthStore();
 
   useEffect(() => {
     const checkAuth = async () => {

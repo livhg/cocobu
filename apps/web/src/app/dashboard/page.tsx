@@ -3,14 +3,24 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { api, type Book } from '@/lib/api';
 import Link from 'next/link';
 
 export default function DashboardPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const { data: books, isLoading, error } = useQuery<Book[]>({
+  const {
+    data: books,
+    isLoading,
+    error,
+  } = useQuery<Book[]>({
     queryKey: ['books'],
     queryFn: async () => {
       const response = await api.get<Book[]>('/books');
@@ -29,7 +39,8 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="rounded-md bg-red-50 p-4 text-sm text-red-800">
-        載入帳本時發生錯誤: {error instanceof Error ? error.message : '未知錯誤'}
+        載入帳本時發生錯誤:{' '}
+        {error instanceof Error ? error.message : '未知錯誤'}
       </div>
     );
   }
@@ -96,7 +107,8 @@ export default function DashboardPage() {
                     <div className="flex-1">
                       <CardTitle>{book.name}</CardTitle>
                       <CardDescription>
-                        {book.type === 'PERSONAL' ? '個人帳本' : '分帳帳本'} • {book.currency}
+                        {book.type === 'PERSONAL' ? '個人帳本' : '分帳帳本'} •{' '}
+                        {book.currency}
                       </CardDescription>
                     </div>
                     <div
@@ -112,7 +124,8 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-sm text-gray-600">
-                    建立於 {new Date(book.created_at).toLocaleDateString('zh-TW')}
+                    建立於{' '}
+                    {new Date(book.created_at).toLocaleDateString('zh-TW')}
                   </div>
                 </CardContent>
               </Card>
