@@ -4,12 +4,28 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Public } from '../common/decorators/public.decorator';
+import { AUTH_CONSTANTS } from '../common/constants/auth.constants';
 
 @ApiTags('Authentication')
 @Controller('auth')
 @Public()
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  /**
+   * Helper method to set session cookie with consistent configuration
+   * @param response Express response object
+   * @param token JWT session token
+   * @param forceInsecure Force secure flag to false (for dev-only endpoints)
+   */
+  private setSessionCookie(response: Response, token: string, forceInsecure = false): void {
+    response.cookie('session', token, {
+      httpOnly: true,
+      secure: forceInsecure ? false : process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: AUTH_CONSTANTS.COOKIE_MAX_AGE,
+    });
+  }
 
   @Post('login')
   @HttpCode(200)
@@ -29,15 +45,7 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const result = await this.authService.verify(token);
-
-    // Set HTTP-only cookie with session token
-    response.cookie('session', result.accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
+    this.setSessionCookie(response, result.accessToken);
     return result;
   }
 
@@ -50,15 +58,7 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const result = await this.authService.devLogin(email);
-
-    // Set HTTP-only cookie with session token
-    response.cookie('session', result.accessToken, {
-      httpOnly: true,
-      secure: false, // Dev mode
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
+    this.setSessionCookie(response, result.accessToken, true);
     return result;
   }
 

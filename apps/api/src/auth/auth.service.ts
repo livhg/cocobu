@@ -23,7 +23,7 @@ export class AuthService {
   private transporter: nodemailer.Transporter | null = null;
   // TODO: Move to Redis for production
   // Current in-memory storage will lose data on restart and doesn't work in multi-instance deployments
-  private magicLinkTokens: Map<string, { email: string; used: boolean; expires: Date }> = new Map();
+  private magicLinkTokens: Map<string, { email: string; expires: Date }> = new Map();
 
   constructor(
     private prisma: PrismaService,
@@ -67,7 +67,6 @@ export class AuthService {
     // TODO: Move to Redis for production (atomic operations and persistence)
     this.magicLinkTokens.set(token, {
       email,
-      used: false,
       expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
     });
 
@@ -124,14 +123,10 @@ CocoBu 叩叩簿
       throw new UnauthorizedException('Invalid token type');
     }
 
-    // Check if token has been used
+    // Check if token exists and is not expired
     const tokenData = this.magicLinkTokens.get(token);
     if (!tokenData) {
       throw new UnauthorizedException('Magic link not found or already used');
-    }
-
-    if (tokenData.used) {
-      throw new UnauthorizedException('Magic link has already been used');
     }
 
     if (tokenData.expires < new Date()) {
@@ -139,7 +134,7 @@ CocoBu 叩叩簿
       throw new UnauthorizedException('Magic link has expired');
     }
 
-    // Mark token as used and immediately delete it
+    // Delete token immediately for single-use enforcement
     this.magicLinkTokens.delete(token);
 
     // Create session for user

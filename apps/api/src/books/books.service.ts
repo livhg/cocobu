@@ -32,8 +32,19 @@ export class BooksService {
   }
 
   async findById(bookId: string, userId: string) {
-    const book = await this.prisma.book.findUnique({
-      where: { id: bookId },
+    // Query with access check built into WHERE clause for better performance
+    const book = await this.prisma.book.findFirst({
+      where: {
+        id: bookId,
+        OR: [
+          { ownerId: userId },
+          {
+            memberships: {
+              some: { userId },
+            },
+          },
+        ],
+      },
       include: {
         owner: {
           select: { id: true, email: true, name: true },
@@ -52,15 +63,16 @@ export class BooksService {
     });
 
     if (!book) {
-      throw new NotFoundException('Book not found');
-    }
+      // Distinguish between "not found" and "no access"
+      const bookExists = await this.prisma.book.findUnique({
+        where: { id: bookId },
+        select: { id: true },
+      });
 
-    // Check if user has access (owner or member)
-    const hasAccess =
-      book.ownerId === userId ||
-      book.memberships.some((m: any) => m.userId === userId);
+      if (!bookExists) {
+        throw new NotFoundException('Book not found');
+      }
 
-    if (!hasAccess) {
       throw new ForbiddenException('You do not have access to this book');
     }
 
@@ -73,7 +85,7 @@ export class BooksService {
     // Create book
     const book = await this.prisma.book.create({
       data: {
-        type: type as any,
+        type,
         name,
         currency: currency || 'TWD',
         ownerId: userId,
@@ -102,21 +114,27 @@ export class BooksService {
   }
 
   async delete(bookId: string, userId: string) {
-    const book = await this.prisma.book.findUnique({
-      where: { id: bookId },
+    // Atomic delete operation: only deletes if both bookId and ownerId match
+    const result = await this.prisma.book.deleteMany({
+      where: {
+        id: bookId,
+        ownerId: userId,
+      },
     });
 
-    if (!book) {
-      throw new NotFoundException('Book not found');
-    }
+    // If no rows deleted, determine if book doesn't exist or user doesn't own it
+    if (result.count === 0) {
+      const book = await this.prisma.book.findUnique({
+        where: { id: bookId },
+        select: { id: true },
+      });
 
-    if (book.ownerId !== userId) {
+      if (!book) {
+        throw new NotFoundException('Book not found');
+      }
+
       throw new ForbiddenException('Only the book owner can delete it');
     }
-
-    await this.prisma.book.delete({
-      where: { id: bookId },
-    });
 
     return { message: 'Book deleted successfully' };
   }

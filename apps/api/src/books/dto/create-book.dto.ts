@@ -1,10 +1,6 @@
 import { IsString, IsEnum, IsOptional, MinLength, MaxLength, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-
-export enum BookType {
-  PERSONAL = 'personal',
-  SPLIT = 'split',
-}
+import { BookType } from '@prisma/client';
 
 export class CreateBookDto {
   @ApiProperty({

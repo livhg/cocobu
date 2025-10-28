@@ -5,6 +5,9 @@ export const AUTH_CONSTANTS = {
   SESSION_EXPIRY: '7d',
   SESSION_EXPIRY_MS: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
 
+  // Cookie configuration
+  COOKIE_MAX_AGE: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+
   // Email configuration
   DEFAULT_FROM_EMAIL: 'noreply@cocobu.app',
 } as const;
