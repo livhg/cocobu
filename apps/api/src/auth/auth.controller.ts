@@ -6,6 +6,7 @@ import {
   Query,
   Res,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -13,6 +14,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { AUTH_CONSTANTS } from '../common/constants/auth.constants';
+import { RateLimitGuard, RateLimit } from '../common/guards/rate-limit.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -41,9 +43,12 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(200)
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ points: 3, duration: 3600, keyPrefix: 'auth' })
   @ApiOperation({ summary: 'Request magic link login' })
   @ApiResponse({ status: 200, description: 'Magic link sent successfully' })
   @ApiResponse({ status: 400, description: 'Invalid email' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }

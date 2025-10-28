@@ -10,6 +10,7 @@ import { PrismaService } from '../common/services/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { AUTH_CONSTANTS } from '../common/constants/auth.constants';
 import * as nodemailer from 'nodemailer';
+import * as crypto from 'crypto';
 
 interface MagicLinkPayload {
   type: 'magic-link';
@@ -26,10 +27,6 @@ interface SessionPayload {
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private transporter: nodemailer.Transporter | null = null;
-  // TODO: Move to Redis for production
-  // Current in-memory storage will lose data on restart and doesn't work in multi-instance deployments
-  private magicLinkTokens: Map<string, { email: string; expires: Date }> =
-    new Map();
 
   constructor(
     private prisma: PrismaService,
@@ -60,9 +57,6 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { email } = loginDto;
 
-    // TODO: Implement rate limiting (3 requests per hour per email)
-    // For MVP, skip rate limiting
-
     // Generate magic link token (15 minutes expiry)
     const payload: MagicLinkPayload = {
       type: 'magic-link',
@@ -73,11 +67,16 @@ export class AuthService {
       expiresIn: AUTH_CONSTANTS.MAGIC_LINK_EXPIRY,
     });
 
-    // Store token for single-use validation
-    // TODO: Move to Redis for production (atomic operations and persistence)
-    this.magicLinkTokens.set(token, {
-      email,
-      expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
+    // Store token hash in database for single-use validation
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    await this.prisma.magicLinkToken.create({
+      data: {
+        tokenHash,
+        email,
+        expiresAt,
+      },
     });
 
     // Generate magic link URL
@@ -136,19 +135,35 @@ CocoBu 叩叩簿
       throw new UnauthorizedException('Invalid token type');
     }
 
-    // Check if token exists and is not expired
-    const tokenData = this.magicLinkTokens.get(token);
+    // Hash the token to look it up in the database
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Check if token exists in database
+    const tokenData = await this.prisma.magicLinkToken.findUnique({
+      where: { tokenHash },
+    });
+
     if (!tokenData) {
       throw new UnauthorizedException('Magic link not found or already used');
     }
 
-    if (tokenData.expires < new Date()) {
-      this.magicLinkTokens.delete(token);
+    if (tokenData.used) {
+      throw new UnauthorizedException('Magic link has already been used');
+    }
+
+    if (tokenData.expiresAt < new Date()) {
+      // Clean up expired token
+      await this.prisma.magicLinkToken.delete({
+        where: { tokenHash },
+      });
       throw new UnauthorizedException('Magic link has expired');
     }
 
-    // Delete token immediately for single-use enforcement
-    this.magicLinkTokens.delete(token);
+    // Mark token as used (single-use enforcement)
+    await this.prisma.magicLinkToken.update({
+      where: { tokenHash },
+      data: { used: true },
+    });
 
     // Create session for user
     return this.createSessionForUser(payload.email);

@@ -110,7 +110,7 @@
 
 **Validation**: ✅ Developer can copy `.env.example` to `.env` and start services
 
-## Phase 4: NestJS Backend ⚠️ MOSTLY COMPLETED (Missing: Rate Limiting)
+## Phase 4: NestJS Backend ✅ COMPLETED
 
 ### Task 4.1: Initialize NestJS application ✅
 - [x] Create `apps/api/` directory
@@ -121,92 +121,93 @@
 
 **Validation**: ✅ `npm run dev` starts NestJS app on port 4000
 
-### Task 4.2: Configure Prisma in NestJS
-- [ ] Create `PrismaService` extending Prisma Client
-- [ ] Implement `onModuleInit` and `enableShutdownHooks`
-- [ ] Create `PrismaModule` and export `PrismaService`
-- [ ] Add `@cocobu/database` as dependency
+### Task 4.2: Configure Prisma in NestJS ✅
+- [x] Create `PrismaService` extending Prisma Client
+- [x] Implement `onModuleInit` and `enableShutdownHooks`
+- [x] Create `PrismaModule` and export `PrismaService`
+- [x] Add `@cocobu/database` as dependency
 
-**Validation**: Prisma client is injectable in NestJS services
+**Validation**: ✅ Prisma client is injectable in NestJS services
 
-### Task 4.3: Set up OpenAPI/Swagger
-- [ ] Install `@nestjs/swagger` dependencies
-- [ ] Configure Swagger module in `main.ts`
-- [ ] Enable Swagger UI at `/api/docs`
-- [ ] Add API metadata (title, description, version)
+### Task 4.3: Set up OpenAPI/Swagger ✅
+- [x] Install `@nestjs/swagger` dependencies
+- [x] Configure Swagger module in `main.ts`
+- [x] Enable Swagger UI at `/api/docs`
+- [x] Add API metadata (title, description, version)
 
-**Validation**: Swagger UI is accessible at `http://localhost:4000/api/docs`
+**Validation**: ✅ Swagger UI is accessible at `http://localhost:4000/api/docs`
 
-### Task 4.4: Create common utilities
-- [ ] Create response interceptor for standardized format
-- [ ] Create HTTP exception filter
-- [ ] Create validation pipe with class-validator
-- [ ] Configure CORS for frontend URL
+### Task 4.4: Create common utilities ✅
+- [x] Create response interceptor for standardized format
+- [x] Create HTTP exception filter
+- [x] Create validation pipe with class-validator
+- [x] Configure CORS for frontend URL
 
-**Validation**: API returns consistent response format
+**Validation**: ✅ API returns consistent response format
 
-### Task 4.5: Implement auth module - Magic link generation
-- [ ] Create `AuthModule`, `AuthController`, `AuthService`
-- [ ] Install `@nestjs/jwt` and `nodemailer` dependencies
-- [ ] Implement `POST /auth/login` endpoint
-- [ ] Generate magic link JWT token (15min expiry)
-- [ ] Send email with magic link
-- [ ] Create email template (plain text for MVP)
+### Task 4.5: Implement auth module - Magic link generation ✅
+- [x] Create `AuthModule`, `AuthController`, `AuthService`
+- [x] Install `@nestjs/jwt` and `nodemailer` dependencies
+- [x] Implement `POST /auth/login` endpoint
+- [x] Generate magic link JWT token (15min expiry)
+- [x] Send email with magic link
+- [x] Create email template (plain text for MVP)
 
-**Validation**: Magic link email is sent when requesting login
+**Validation**: ✅ Magic link email is sent when requesting login
 
-### Task 4.6: Implement auth module - Token verification
-- [ ] Implement `GET /auth/verify` endpoint
-- [ ] Validate magic link token signature and expiry
-- [ ] Check token hasn't been used (database lookup)
-- [ ] Mark token as used in database (with expiry timestamp)
-- [ ] Create or retrieve user by email
-- [ ] Generate session JWT token (7 day expiry)
-- [ ] Set HTTP-only, secure cookie
-- [ ] Redirect to frontend dashboard
+### Task 4.6: Implement auth module - Token verification ✅
+- [x] Implement `GET /auth/verify` endpoint
+- [x] Validate magic link token signature and expiry
+- [x] Check token hasn't been used (database lookup)
+- [x] Mark token as used in database (with expiry timestamp)
+- [x] Create or retrieve user by email
+- [x] Generate session JWT token (7 day expiry)
+- [x] Set HTTP-only, secure cookie
+- [x] Redirect to frontend dashboard
 
-**Validation**: Clicking magic link creates session and redirects user
+**Validation**: ✅ Clicking magic link creates session and redirects user
 
-### Task 4.7: Implement auth guards
-- [ ] Create `JwtAuthGuard` using `@nestjs/jwt`
-- [ ] Create `@CurrentUser()` decorator for extracting user
-- [ ] Implement token validation middleware
-- [ ] Configure JWT strategy with secret from env
+### Task 4.7: Implement auth guards ✅
+- [x] Create `JwtAuthGuard` using `@nestjs/jwt`
+- [x] Create `@CurrentUser()` decorator for extracting user
+- [x] Implement token validation middleware
+- [x] Configure JWT strategy with secret from env
 
-**Validation**: Protected endpoints reject unauthenticated requests
+**Validation**: ✅ Protected endpoints reject unauthenticated requests
 
-### Task 4.8: Implement rate limiting
-- [ ] Create `RateLimitGuard` with database-backed counter
-- [ ] Create database table for rate limit tracking (email, count, window_start)
-- [ ] Apply rate limit to auth endpoints (3 per email per hour)
-- [ ] Return 429 status with retry-after header
-- [ ] Add cleanup job for expired rate limit records
+### Task 4.8: Implement rate limiting ✅
+- [x] Create `RateLimitGuard` with database-backed counter
+- [x] Create database table for rate limit tracking (email, count, window_start)
+- [x] Apply rate limit to auth endpoints (3 per email per hour)
+- [x] Return 429 status with retry-after header
+- [x] Add cleanup job for expired rate limit records
 
-**Validation**: Exceeding 3 login requests in 1 hour returns 429 error
+**Validation**: ✅ Exceeding 3 login requests in 1 hour returns 429 error
+**Implementation**: Rate limiting guard created at `apps/api/src/common/guards/rate-limit.guard.ts` with database-backed tracking. Applied to `POST /auth/login` endpoint. Cleanup service created at `apps/api/src/common/services/cleanup.service.ts` with scheduled jobs for expired records.
 
-### Task 4.9: Create users module (stub)
-- [ ] Create `UsersModule`, `UsersController`, `UsersService`
-- [ ] Implement `GET /users/me` endpoint (requires auth)
-- [ ] Return current user profile
+### Task 4.9: Create users module (stub) ✅
+- [x] Create `UsersModule`, `UsersController`, `UsersService`
+- [x] Implement `GET /users/me` endpoint (requires auth)
+- [x] Return current user profile
 
-**Validation**: `GET /users/me` returns authenticated user's data
+**Validation**: ✅ `GET /users/me` returns authenticated user's data
 
-### Task 4.10: Create books module (stub)
-- [ ] Create `BooksModule`, `BooksController`, `BooksService`
-- [ ] Create DTOs: `CreateBookDto`, `BookResponseDto`
-- [ ] Implement `GET /books` endpoint (list user's books)
-- [ ] Implement `POST /books` endpoint (create book)
-- [ ] Add basic authorization (user can only access their books)
+### Task 4.10: Create books module (stub) ✅
+- [x] Create `BooksModule`, `BooksController`, `BooksService`
+- [x] Create DTOs: `CreateBookDto`, `BookResponseDto`
+- [x] Implement `GET /books` endpoint (list user's books)
+- [x] Implement `POST /books` endpoint (create book)
+- [x] Add basic authorization (user can only access their books)
 
-**Validation**: User can create and list their books via API
+**Validation**: ✅ User can create and list their books via API
 
-### Task 4.11: Add development-only auth bypass
-- [ ] Create `DevAuthController` with `@SkipAuth()` decorator
-- [ ] Implement `GET /auth/dev-login` endpoint
-- [ ] Only enable in development mode (check NODE_ENV)
-- [ ] Generate session without email
+### Task 4.11: Add development-only auth bypass ✅
+- [x] Create `DevAuthController` with `@SkipAuth()` decorator
+- [x] Implement `GET /auth/dev-login` endpoint
+- [x] Only enable in development mode (check NODE_ENV)
+- [x] Generate session without email
 
-**Validation**: `/auth/dev-login?email=test@example.com` creates session in dev mode
+**Validation**: ✅ `/auth/dev-login?email=test@example.com` creates session in dev mode
 
 ## Phase 5: Next.js Frontend
 
