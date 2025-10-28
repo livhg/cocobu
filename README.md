@@ -38,6 +38,10 @@ CocoBu (叩叩 = money in Taiwanese, 簿 = ledger) is a web-based expense tracki
 - Node.js >= 18.0.0
 - npm >= 9.0.0
 - Docker & Docker Compose
+- OpenSpec CLI (for spec-driven development)
+  ```bash
+  npm install -g @fission-ai/openspec@latest
+  ```
 
 ### Initial Setup
 
@@ -120,6 +124,18 @@ npm run db:migrate:deploy  # Apply migrations (production)
 npm run db:reset           # Reset database (dangerous!)
 npm run db:seed            # Seed database with sample data
 ```
+
+### OpenSpec (Spec-Driven Development)
+
+```bash
+openspec list                    # List active changes
+openspec list --specs            # List existing specifications
+openspec show [item]             # Display change or spec details
+openspec validate [item] --strict # Validate changes or specs
+openspec archive <change-id> --yes # Archive completed change
+```
+
+For detailed OpenSpec workflow, see [OpenSpec Documentation](./openspec/AGENTS.md).
 
 ## 📖 Documentation
 
