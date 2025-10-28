@@ -7,30 +7,30 @@ This change is primarily a **planning and documentation** change. Implementation
 
 ### Task 1.1: Register domain name
 - [x] Register `cocobu.online` via Cloudflare Registrar or Namecheap
-- [ ] Enable auto-renewal to prevent expiration
-- [ ] Document domain registration details in team password manager
+- [x] Enable auto-renewal to prevent expiration
+- [x] Document domain registration details in team password manager
 
-**Validation**: Domain is registered and shows in registrar dashboard
+**Validation**: Domain is registered and shows in registrar dashboard ✅
 
 **Estimated time**: 20 minutes
 
 ### Task 1.2: Configure Cloudflare DNS
-- [ ] Add domain to Cloudflare account
-- [ ] Update nameservers at registrar to point to Cloudflare
-- [ ] Wait for DNS propagation (up to 24-48 hours)
-- [ ] Verify nameservers are updated using `dig NS cocobu.online`
+- [x] Add domain to Cloudflare account
+- [x] Update nameservers at registrar to point to Cloudflare
+- [x] Wait for DNS propagation (up to 24-48 hours)
+- [x] Verify nameservers are updated using `dig NS cocobu.online`
 
-**Validation**: `dig cocobu.online` resolves using Cloudflare nameservers
+**Validation**: `dig cocobu.online` resolves using Cloudflare nameservers ✅
 
 **Estimated time**: 15 minutes (plus propagation wait time)
 
 ### Task 1.3: Create DNS records for services
-- [ ] Create A/CNAME record: `cocobu.online` → Vercel (will be configured in Task 2.2)
-- [ ] Create A/CNAME record: `api.cocobu.online` → Railway (will be configured in Task 3.2)
-- [ ] Create CNAME record: `www.cocobu.online` → `cocobu.online`
-- [ ] Enable Cloudflare proxy (orange cloud) for DDoS protection
+- [x] Create A/CNAME record: `cocobu.online` → Vercel (will be configured in Task 2.2)
+- [x] Create A/CNAME record: `api.cocobu.online` → Railway (will be configured in Task 3.2)
+- [x] Create CNAME record: `www.cocobu.online` → `cocobu.online`
+- [x] Enable Cloudflare proxy (orange cloud) for DDoS protection
 
-**Validation**: All DNS records resolve correctly using `dig` command
+**Validation**: All DNS records resolve correctly using `dig` command ✅
 
 **Estimated time**: 20 minutes
 
@@ -61,27 +61,27 @@ This change is primarily a **planning and documentation** change. Implementation
 ## Phase 2: Frontend Deployment (Vercel)
 
 ### Task 2.1: Create Vercel project
-- [ ] Sign up for Vercel account (if not exists)
-- [ ] Install Vercel CLI: `npm install -g vercel`
-- [ ] Link repository to Vercel: `vercel link`
-- [ ] Configure build settings (Next.js detected automatically)
-- [ ] Set root directory to `apps/web`
+- [x] Sign up for Vercel account (if not exists)
+- [x] Install Vercel CLI: `npm install -g vercel`
+- [x] Link repository to Vercel: `vercel link`
+- [x] Configure build settings (Next.js detected automatically)
+- [x] Set root directory to `apps/web`
 
-**Validation**: Vercel project is created and linked to GitHub repo
+**Validation**: Vercel project is created and linked to GitHub repo ✅
 
 **Estimated time**: 15 minutes
 
 ### Task 2.2: Configure production environment
-- [ ] Add custom domain in Vercel dashboard: `cocobu.online`
-- [ ] Add custom domain: `www.cocobu.online` (redirect to apex)
-- [ ] Verify DNS records are correct
-- [ ] Wait for SSL certificate provisioning (automatic)
-- [ ] Set environment variables in Vercel dashboard:
+- [x] Add custom domain in Vercel dashboard: `cocobu.online`
+- [x] Add custom domain: `www.cocobu.online` (redirect to apex)
+- [x] Verify DNS records are correct
+- [x] Wait for SSL certificate provisioning (automatic)
+- [x] Set environment variables in Vercel dashboard:
   - `NEXT_PUBLIC_API_URL=https://api.cocobu.online`
   - Any other public environment variables
-- [ ] Deploy to production
+- [x] Deploy to production
 
-**Validation**: `https://cocobu.online` loads successfully with SSL
+**Validation**: `https://cocobu.online` loads successfully with SSL ✅
 
 **Estimated time**: 30 minutes
 
@@ -101,13 +101,13 @@ This change is primarily a **planning and documentation** change. Implementation
 ## Phase 3: Backend Deployment (Railway)
 
 ### Task 3.1: Create Railway project
-- [ ] Sign up for Railway account (if not exists)
-- [ ] Install Railway CLI: `npm install -g @railway/cli`
-- [ ] Create new project: `railway init`
-- [ ] Link GitHub repository
-- [ ] Select `apps/api` as root directory
+- [x] Sign up for Railway account (if not exists)
+- [x] Install Railway CLI: `npm install -g @railway/cli`
+- [x] Create new project: `railway init`
+- [x] Link GitHub repository
+- [x] Select `apps/api` as root directory
 
-**Validation**: Railway project is created and linked
+**Validation**: Railway project is created and linked ✅
 
 **Estimated time**: 15 minutes
 
