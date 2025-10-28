@@ -47,11 +47,10 @@ Follow the tech stack defined in project.md:
   - CDN integration for fast delivery
 
 #### 2. Domain Strategy
-- **Domain acquisition**: Register via Cloudflare Registrar or Namecheap
-  - Primary domain: `cocobu.com` (first choice) or `cocobu.app`
-  - Development subdomain: `dev.cocobu.com`
-  - Staging subdomain: `staging.cocobu.com`
-  - API subdomain: `api.cocobu.com`
+- **Domain acquisition**: Register `cocobu.com` via Cloudflare Registrar or Namecheap
+  - Primary domain: `cocobu.com` (apex for frontend)
+  - API subdomain: `api.cocobu.com` (for backend)
+  - WWW redirect: `www.cocobu.com` → `cocobu.com`
 - **DNS management**: Cloudflare DNS
   - Free SSL/TLS certificates
   - DDoS protection
@@ -59,14 +58,15 @@ Follow the tech stack defined in project.md:
 - **SSL/TLS**: Automatic via Vercel and Cloudflare
 
 #### 3. Environment Configuration
-Three environments with progressive rollout:
-- **Development**: Local Docker, `dev.cocobu.com` for testing
-- **Staging**: Mirror of production, `staging.cocobu.com`
+Two environments for MVP simplicity:
+- **Development**: Local Docker (localhost:3000, localhost:4000)
 - **Production**: Live system, `cocobu.com` and `api.cocobu.com`
+
+**Rationale for no staging**: As an MVP testing market fit, we minimize infrastructure complexity and costs. Staging environment will be added post-MVP when traffic and team size justify it. Development testing on localhost combined with preview deployments (Vercel PR previews) provide sufficient pre-production validation.
 
 Secrets management:
 - Vercel: Environment variables in project settings
-- Railway/Fly.io: CLI or dashboard for secrets
+- Railway: CLI or dashboard for secrets
 - GitHub Actions: Repository secrets for CI/CD
 - No secrets in code or git history
 
@@ -113,15 +113,16 @@ Secrets management:
 - **Operations**: Defined runbooks for common scenarios
 
 ### System Impact
-- **New services**: Vercel, Railway/Fly.io, Cloudflare, Sentry, UptimeRobot
-- **Monthly costs** (estimated MVP):
-  - Vercel: $0 (Hobby) or $20 (Pro for team)
-  - Railway: ~$10-20 (MySQL + API)
-  - Cloudflare: $0 (Free) or $10-20 (domain registration)
-  - Sentry: $0 (Developer) or $26 (Team)
-  - UptimeRobot: $0 (Free tier)
-  - **Total**: $20-50/month for MVP
-- **Complexity**: Adds operational overhead but provides essential safety net
+- **New services**: Vercel, Railway, Cloudflare, Resend, Sentry, UptimeRobot
+- **Monthly costs** (estimated MVP, production only):
+  - Vercel: $0 (Hobby tier sufficient for MVP)
+  - Railway: ~$5-10 (MySQL + API on Starter plan)
+  - Cloudflare: $10-15 (domain registration, DNS is free)
+  - Resend: $0 (free tier: 3000 emails/month)
+  - Sentry: $0 (Developer tier: 5K events/month)
+  - UptimeRobot: $0 (Free tier: 50 monitors, 5-min checks)
+  - **Total**: $15-25/month for MVP (single production environment)
+- **Complexity**: Minimal for MVP - single production environment, managed services reduce operational burden
 
 ### Migration Required
 - None (greenfield)
@@ -171,37 +172,31 @@ Secrets management:
 ## Open Questions
 
 ### Resolved
-None yet.
-
-### Unresolved
-1. **Domain name**: `cocobu.com` vs `cocobu.app` vs other?
-   - Recommendation: Check availability, prefer `.com` for familiarity
+1. ✅ **Domain name**: `cocobu.com`
+   - Decision: Use `cocobu.com` for brand recognition and familiarity
    - Budget: ~$10-15/year
 
-2. **Backend hosting**: Railway vs Fly.io for MVP?
-   - Railway: Simpler, includes MySQL, better DX
-   - Fly.io: Better global presence, more mature
-   - Recommendation: **Railway** for MVP (can migrate later)
+2. ✅ **Backend hosting**: Railway for MVP
+   - Decision: Railway for simpler setup, includes MySQL, better DX
+   - Migration path to Fly.io exists if needed later
 
-3. **Database hosting**: Railway MySQL vs PlanetScale?
-   - Railway: Simpler, co-located with API
-   - PlanetScale: Better scaling, branching workflow
-   - Recommendation: **Railway** for MVP (can migrate via Prisma)
+3. ✅ **Database hosting**: Railway MySQL for MVP
+   - Decision: Railway MySQL for co-location with API, simpler operations
+   - Migration path to PlanetScale via Prisma exists if needed
 
-4. **Email service for magic links**: Resend vs SendGrid vs AWS SES?
-   - Resend: Modern, generous free tier (3000 emails/month)
-   - SendGrid: Established, 100 emails/day free
-   - AWS SES: Cheap at scale, complex setup
-   - Recommendation: **Resend** for simplicity and DX
+4. ✅ **Email service for magic links**: Resend
+   - Decision: Resend for modern API, generous free tier (3000 emails/month), excellent DX
 
-5. **Error tracking**: Sentry vs alternatives (LogRocket, Rollbar)?
-   - Sentry: Industry standard, generous free tier
-   - LogRocket: Includes session replay (expensive)
-   - Rollbar: Similar to Sentry
-   - Recommendation: **Sentry** for ecosystem and free tier
+5. ✅ **Error tracking**: Sentry
+   - Decision: Sentry for industry-standard tooling and generous free tier
 
-6. **Staging environment**: Deploy immediately or wait for MVP features?
-   - Recommendation: **Deploy staging with foundation** to test deployment pipeline early
+6. ✅ **Staging environment**: Skip for MVP, add post-launch
+   - Decision: No staging environment for MVP to minimize complexity and cost
+   - Rationale: Testing on localhost + Vercel PR previews sufficient for MVP market validation
+   - Post-MVP: Add staging when traffic/team size justifies it
+
+### Unresolved
+None - all key decisions finalized for MVP launch.
 
 ## Success Criteria
 

@@ -71,19 +71,12 @@ The system SHALL organize services using subdomain hierarchy for clear separatio
 - **AND** all HTTP requests SHALL redirect to HTTPS
 - **AND** www subdomain SHALL redirect to apex: `www.cocobu.com` → `cocobu.com`
 
-#### Scenario: Staging domain structure
-- **GIVEN** staging environment exists
-- **WHEN** staging deployment is configured
-- **THEN** staging subdomain SHALL serve frontend: `staging.cocobu.com` → Vercel
-- **AND** staging API subdomain SHALL serve backend: `api-staging.cocobu.com` → Railway
-- **AND** staging SHALL be independently deployable from production
-
-#### Scenario: Development domain structure
-- **GIVEN** development environment exists
-- **WHEN** development deployment is needed (optional)
-- **THEN** dev subdomain MAY serve frontend: `dev.cocobu.com` → Vercel
-- **AND** dev API subdomain MAY serve backend: `api-dev.cocobu.com` → Railway
-- **AND** dev environment SHALL use separate database and services
+#### Scenario: Development uses localhost
+- **GIVEN** developer is working locally
+- **WHEN** development environment runs
+- **THEN** frontend SHALL be accessible at `http://localhost:3000`
+- **AND** backend SHALL be accessible at `http://localhost:4000`
+- **AND** no custom domain configuration SHALL be required for local development
 
 ### Requirement: SSL/TLS Certificates
 The system SHALL encrypt all traffic with valid SSL/TLS certificates automatically provisioned and renewed.
@@ -127,25 +120,25 @@ The system SHALL configure Cross-Origin Resource Sharing (CORS) to allow fronten
 **Rationale**: Browser security requires explicit CORS configuration for API requests from different origins. Proper configuration prevents CSRF attacks while enabling legitimate requests.
 
 #### Scenario: Production CORS policy
-- **GIVEN** backend API is running
+- **GIVEN** backend API is running in production
 - **WHEN** request originates from `cocobu.com`
 - **THEN** API SHALL include header: `Access-Control-Allow-Origin: https://cocobu.com`
 - **AND** API SHALL include header: `Access-Control-Allow-Credentials: true`
 - **AND** API SHALL allow methods: GET, POST, PUT, DELETE, PATCH, OPTIONS
 - **AND** API SHALL allow headers: Content-Type, Authorization, Cookie
 
-#### Scenario: Staging CORS policy
-- **GIVEN** staging backend is running
-- **WHEN** request originates from `staging.cocobu.com`
-- **THEN** API SHALL include header: `Access-Control-Allow-Origin: https://staging.cocobu.com`
-- **AND** staging SHALL NOT accept requests from production domain
-- **AND** production SHALL NOT accept requests from staging domain
-
 #### Scenario: Development CORS policy
-- **GIVEN** development backend is running locally
+- **GIVEN** backend is running locally
 - **WHEN** request originates from `http://localhost:3000`
 - **THEN** API SHALL include header: `Access-Control-Allow-Origin: http://localhost:3000`
-- **AND** development SHALL accept requests from any localhost port (for flexibility)
+- **AND** API SHALL accept requests from any localhost port (for flexibility)
+
+#### Scenario: Preview deployment CORS
+- **GIVEN** Vercel preview deployment is created
+- **WHEN** preview frontend requests API
+- **THEN** production API SHALL accept requests from Vercel preview domains
+- **AND** preview domain pattern SHALL be whitelisted: `*.vercel.app`
+- **AND** CORS SHALL allow credentials for authenticated requests
 
 #### Scenario: Unauthorized CORS request
 - **GIVEN** backend API is running

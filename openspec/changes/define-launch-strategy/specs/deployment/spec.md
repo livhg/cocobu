@@ -113,9 +113,9 @@ The system SHALL use Cloudflare R2 for receipt and attachment storage with S3-co
 - **AND** old versions SHALL be automatically deleted after retention period
 
 ### Requirement: Environment Separation
-The system SHALL maintain three isolated environments: development, staging, and production.
+The system SHALL maintain two isolated environments: development and production.
 
-**Rationale**: Environment separation prevents accidental data corruption, enables safe testing, and follows best practices for deployment pipeline.
+**Rationale**: For MVP simplicity, we use only development (local) and production environments. This minimizes infrastructure complexity and costs while Vercel's PR preview deployments provide pre-production testing capability. Staging environment will be added post-MVP when justified by traffic and team size.
 
 #### Scenario: Development environment
 - **GIVEN** developer is working locally
@@ -123,14 +123,7 @@ The system SHALL maintain three isolated environments: development, staging, and
 - **THEN** application SHALL connect to local MySQL in Docker
 - **AND** application SHALL use development environment variables from `.env`
 - **AND** authentication SHALL allow dev-mode login bypass
-
-#### Scenario: Staging environment
-- **GIVEN** code is merged to `staging` branch
-- **WHEN** deployment triggers
-- **THEN** application SHALL deploy to `staging.cocobu.com` and `api-staging.cocobu.com`
-- **AND** application SHALL use staging environment variables
-- **AND** application SHALL connect to staging database (isolated from production)
-- **AND** staging SHALL mirror production configuration except for secrets
+- **AND** hot-reload SHALL be enabled for rapid iteration
 
 #### Scenario: Production environment
 - **GIVEN** code is merged to `main` branch
@@ -139,6 +132,15 @@ The system SHALL maintain three isolated environments: development, staging, and
 - **AND** application SHALL use production environment variables
 - **AND** application SHALL connect to production database
 - **AND** dev-mode features SHALL be disabled
+- **AND** application SHALL run in optimized production mode
+
+#### Scenario: Preview deployment for testing
+- **GIVEN** pull request is opened
+- **WHEN** code is pushed to PR branch
+- **THEN** Vercel SHALL create preview deployment with unique URL
+- **AND** preview SHALL use production-like configuration
+- **AND** preview SHALL connect to production API for testing (or mock data)
+- **AND** preview SHALL be destroyed when PR is closed
 
 ### Requirement: Health Checks
 The system SHALL provide health check endpoints for monitoring deployment status and service availability.

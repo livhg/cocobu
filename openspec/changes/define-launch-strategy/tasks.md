@@ -6,14 +6,13 @@ This change is primarily a **planning and documentation** change. Implementation
 ## Phase 1: Domain and DNS Setup
 
 ### Task 1.1: Register domain name
-- [ ] Check availability of `cocobu.com` and `cocobu.app`
-- [ ] Register preferred domain via Cloudflare Registrar or Namecheap
+- [ ] Register `cocobu.com` via Cloudflare Registrar or Namecheap
 - [ ] Enable auto-renewal to prevent expiration
 - [ ] Document domain registration details in team password manager
 
 **Validation**: Domain is registered and shows in registrar dashboard
 
-**Estimated time**: 30 minutes
+**Estimated time**: 20 minutes
 
 ### Task 1.2: Configure Cloudflare DNS
 - [ ] Add domain to Cloudflare account
@@ -29,13 +28,11 @@ This change is primarily a **planning and documentation** change. Implementation
 - [ ] Create A/CNAME record: `cocobu.com` → Vercel (will be configured in Task 2.2)
 - [ ] Create A/CNAME record: `api.cocobu.com` → Railway (will be configured in Task 3.2)
 - [ ] Create CNAME record: `www.cocobu.com` → `cocobu.com`
-- [ ] Create CNAME record: `staging.cocobu.com` → Vercel (staging)
-- [ ] Create CNAME record: `api-staging.cocobu.com` → Railway (staging)
 - [ ] Enable Cloudflare proxy (orange cloud) for DDoS protection
 
 **Validation**: All DNS records resolve correctly using `dig` command
 
-**Estimated time**: 30 minutes
+**Estimated time**: 20 minutes
 
 ### Task 1.4: Configure DNSSEC and CAA records
 - [ ] Enable DNSSEC in Cloudflare dashboard
@@ -88,19 +85,7 @@ This change is primarily a **planning and documentation** change. Implementation
 
 **Estimated time**: 30 minutes
 
-### Task 2.3: Configure staging environment
-- [ ] Create staging environment in Vercel
-- [ ] Add custom domain: `staging.cocobu.com`
-- [ ] Set environment variables for staging:
-  - `NEXT_PUBLIC_API_URL=https://api-staging.cocobu.com`
-- [ ] Configure auto-deploy from `staging` branch
-- [ ] Deploy to staging
-
-**Validation**: `https://staging.cocobu.com` loads successfully
-
-**Estimated time**: 20 minutes
-
-### Task 2.4: Configure preview deployments
+### Task 2.3: Configure preview deployments
 - [ ] Enable preview deployments for all pull requests
 - [ ] Configure preview environment variables (same as production)
 - [ ] Test preview deployment by creating sample PR
@@ -160,21 +145,9 @@ This change is primarily a **planning and documentation** change. Implementation
 
 **Estimated time**: 15 minutes
 
-### Task 3.5: Configure staging environment
-- [ ] Create staging Railway service (duplicate of production)
-- [ ] Add staging MySQL plugin
-- [ ] Configure staging environment variables (same as production with different URLs)
-- [ ] Add custom domain: `api-staging.cocobu.com`
-- [ ] Deploy staging from `staging` branch
-
-**Validation**: Staging API is accessible at `https://api-staging.cocobu.com/health`
-
-**Estimated time**: 30 minutes
-
-### Task 3.6: Configure automatic deployments
+### Task 3.5: Configure automatic deployments
 - [ ] Enable GitHub integration in Railway
 - [ ] Configure auto-deploy from `main` branch to production
-- [ ] Configure auto-deploy from `staging` branch to staging
 - [ ] Enable build notifications (optional)
 - [ ] Test deployment by pushing to main branch
 
@@ -219,16 +192,6 @@ This change is primarily a **planning and documentation** change. Implementation
 
 **Estimated time**: 20 minutes (optional)
 
-### Task 4.4: Create staging R2 bucket
-- [ ] Create separate bucket: `cocobu-staging-files`
-- [ ] Enable versioning
-- [ ] Generate separate API credentials
-- [ ] Add credentials to Railway staging environment
-
-**Validation**: Staging bucket is configured
-
-**Estimated time**: 15 minutes
-
 ## Phase 5: Monitoring Setup
 
 ### Task 5.1: Configure Sentry error tracking
@@ -272,14 +235,13 @@ This change is primarily a **planning and documentation** change. Implementation
 - [ ] Sign up for UptimeRobot free account
 - [ ] Create monitor for frontend: `https://cocobu.com`
 - [ ] Create monitor for backend health: `https://api.cocobu.com/health`
-- [ ] Create monitor for staging (optional)
 - [ ] Configure check interval: 5 minutes
 - [ ] Configure alert contacts: Email
 - [ ] Configure alert threshold: 2 consecutive failures
 
 **Validation**: Monitors are active and show current status
 
-**Estimated time**: 20 minutes
+**Estimated time**: 15 minutes
 
 ### Task 5.5: Create public status page
 - [ ] Enable public status page in UptimeRobot
@@ -310,7 +272,7 @@ This change is primarily a **planning and documentation** change. Implementation
 - [ ] Confirm daily backups are enabled in Railway
 - [ ] Check backup retention policy (7 days)
 - [ ] Document backup restoration procedure in runbook
-- [ ] Test backup restoration to staging environment
+- [ ] Test backup restoration to separate test database (locally or temporary Railway instance)
 - [ ] Verify restored data integrity
 
 **Validation**: Backup can be restored successfully
@@ -356,8 +318,9 @@ This change is primarily a **planning and documentation** change. Implementation
 
 ### Task 7.1: Configure CORS policies
 - [ ] Update NestJS CORS configuration in `main.ts`
-- [ ] Add production domain to allowed origins
-- [ ] Add staging domain to staging environment's allowed origins
+- [ ] Add production domain to allowed origins: `https://cocobu.com`
+- [ ] Add localhost for development: `http://localhost:3000`
+- [ ] Add Vercel preview domains for PR testing: `*.vercel.app`
 - [ ] Test CORS policy with frontend requests
 - [ ] Verify unauthorized origins are blocked
 
@@ -460,15 +423,16 @@ This change is primarily a **planning and documentation** change. Implementation
 **Estimated time**: 30 minutes
 
 ### Task 8.6: End-to-end deployment test
-- [ ] Deploy complete application to staging
+- [ ] Deploy complete application to production
 - [ ] Test user registration and magic link email
 - [ ] Test creating books and entries
 - [ ] Test file upload to R2
 - [ ] Verify error tracking in Sentry
 - [ ] Verify uptime monitoring in UptimeRobot
 - [ ] Verify application is accessible via custom domain
+- [ ] Test with small group of internal users first
 
-**Validation**: Complete user flow works in staging
+**Validation**: Complete user flow works in production with test accounts
 
 **Estimated time**: 60 minutes
 
@@ -501,13 +465,13 @@ This change is primarily a **planning and documentation** change. Implementation
 
 ### Task 9.3: Update CI/CD pipelines
 - [ ] Update GitHub Actions to include deployment steps
-- [ ] Configure automatic deployment to staging on merge to staging branch
-- [ ] Configure manual approval for production deployment
+- [ ] Configure automatic deployment to production on merge to main branch
+- [ ] Ensure Vercel preview deployments work for all PRs
 - [ ] Test CI/CD pipeline end-to-end
 
-**Validation**: CI/CD deploys to staging automatically
+**Validation**: CI/CD deploys to production automatically, PR previews work
 
-**Estimated time**: 45 minutes
+**Estimated time**: 30 minutes
 
 ---
 
@@ -524,17 +488,19 @@ This change is primarily a **planning and documentation** change. Implementation
 
 ## Estimated Timeline
 
-- **Phase 1 (Domain/DNS)**: 2-3 hours (plus DNS propagation wait time)
+- **Phase 1 (Domain/DNS)**: 2-2.5 hours (plus DNS propagation wait time)
 - **Phase 2 (Vercel)**: 1-1.5 hours
-- **Phase 3 (Railway)**: 1.5-2 hours
-- **Phase 4 (R2)**: 1-1.5 hours
-- **Phase 5 (Monitoring)**: 2-3 hours
+- **Phase 3 (Railway)**: 1-1.5 hours
+- **Phase 4 (R2)**: 1 hour
+- **Phase 5 (Monitoring)**: 2-2.5 hours
 - **Phase 6 (Backup)**: 2-3 hours
 - **Phase 7 (Security)**: 1.5-2 hours
-- **Phase 8 (Documentation)**: 3-4 hours
-- **Phase 9 (Launch)**: 1-2 hours + ongoing
+- **Phase 8 (Documentation)**: 2.5-3 hours
+- **Phase 9 (Launch)**: 1-1.5 hours + ongoing
 
-**Total**: ~15-22 hours of active work (can be spread over several days to account for propagation delays)
+**Total**: ~12-17 hours of active work (MVP production-only setup, can be spread over several days to account for propagation delays)
+
+**Time saved by skipping staging**: ~3-5 hours compared to full staging setup
 
 ## Notes
 
