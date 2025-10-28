@@ -1,6 +1,8 @@
 # OpenSpec Instructions
 
 Instructions for AI coding assistants using OpenSpec for spec-driven development.
+Before proceeding with any OpenSpec operations, verify OpenSpec CLI is installed: `openspec --version`
+If not installed, run: `npm install -g @fission-ai/openspec`
 
 ## TL;DR Quick Checklist
 
