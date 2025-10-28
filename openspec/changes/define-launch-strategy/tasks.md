@@ -6,7 +6,7 @@ This change is primarily a **planning and documentation** change. Implementation
 ## Phase 1: Domain and DNS Setup
 
 ### Task 1.1: Register domain name
-- [ ] Register `cocobu.com` via Cloudflare Registrar or Namecheap
+- [x] Register `cocobu.online` via Cloudflare Registrar or Namecheap
 - [ ] Enable auto-renewal to prevent expiration
 - [ ] Document domain registration details in team password manager
 
@@ -18,16 +18,16 @@ This change is primarily a **planning and documentation** change. Implementation
 - [ ] Add domain to Cloudflare account
 - [ ] Update nameservers at registrar to point to Cloudflare
 - [ ] Wait for DNS propagation (up to 24-48 hours)
-- [ ] Verify nameservers are updated using `dig NS cocobu.com`
+- [ ] Verify nameservers are updated using `dig NS cocobu.online`
 
-**Validation**: `dig cocobu.com` resolves using Cloudflare nameservers
+**Validation**: `dig cocobu.online` resolves using Cloudflare nameservers
 
 **Estimated time**: 15 minutes (plus propagation wait time)
 
 ### Task 1.3: Create DNS records for services
-- [ ] Create A/CNAME record: `cocobu.com` → Vercel (will be configured in Task 2.2)
-- [ ] Create A/CNAME record: `api.cocobu.com` → Railway (will be configured in Task 3.2)
-- [ ] Create CNAME record: `www.cocobu.com` → `cocobu.com`
+- [ ] Create A/CNAME record: `cocobu.online` → Vercel (will be configured in Task 2.2)
+- [ ] Create A/CNAME record: `api.cocobu.online` → Railway (will be configured in Task 3.2)
+- [ ] Create CNAME record: `www.cocobu.online` → `cocobu.online`
 - [ ] Enable Cloudflare proxy (orange cloud) for DDoS protection
 
 **Validation**: All DNS records resolve correctly using `dig` command
@@ -39,8 +39,8 @@ This change is primarily a **planning and documentation** change. Implementation
 - [ ] Copy DS records from Cloudflare
 - [ ] Add DS records to domain registrar
 - [ ] Create CAA record: `0 issue "letsencrypt.org"`
-- [ ] Create CAA record: `0 iodef "mailto:security@cocobu.com"`
-- [ ] Verify DNSSEC with `dig +dnssec cocobu.com`
+- [ ] Create CAA record: `0 iodef "mailto:security@cocobu.online"`
+- [ ] Verify DNSSEC with `dig +dnssec cocobu.online`
 
 **Validation**: DNSSEC is active, CAA records are configured
 
@@ -51,7 +51,7 @@ This change is primarily a **planning and documentation** change. Implementation
 - [ ] Add domain to Resend
 - [ ] Create SPF record as specified by Resend: `v=spf1 include:_spf.resend.com ~all`
 - [ ] Create DKIM CNAME records as specified by Resend
-- [ ] Create DMARC record: `v=DMARC1; p=quarantine; rua=mailto:dmarc@cocobu.com`
+- [ ] Create DMARC record: `v=DMARC1; p=quarantine; rua=mailto:dmarc@cocobu.online`
 - [ ] Send test email and verify SPF/DKIM/DMARC pass
 
 **Validation**: Test email passes all authentication checks and delivers to inbox
@@ -72,16 +72,16 @@ This change is primarily a **planning and documentation** change. Implementation
 **Estimated time**: 15 minutes
 
 ### Task 2.2: Configure production environment
-- [ ] Add custom domain in Vercel dashboard: `cocobu.com`
-- [ ] Add custom domain: `www.cocobu.com` (redirect to apex)
+- [ ] Add custom domain in Vercel dashboard: `cocobu.online`
+- [ ] Add custom domain: `www.cocobu.online` (redirect to apex)
 - [ ] Verify DNS records are correct
 - [ ] Wait for SSL certificate provisioning (automatic)
 - [ ] Set environment variables in Vercel dashboard:
-  - `NEXT_PUBLIC_API_URL=https://api.cocobu.com`
+  - `NEXT_PUBLIC_API_URL=https://api.cocobu.online`
   - Any other public environment variables
 - [ ] Deploy to production
 
-**Validation**: `https://cocobu.com` loads successfully with SSL
+**Validation**: `https://cocobu.online` loads successfully with SSL
 
 **Estimated time**: 30 minutes
 
@@ -133,7 +133,7 @@ This change is primarily a **planning and documentation** change. Implementation
   - `MAGIC_LINK_SECRET` (generate secure random string)
   - `MAGIC_LINK_EXPIRES_IN=15m`
   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` (from Resend)
-  - `FRONTEND_URL=https://cocobu.com`
+  - `FRONTEND_URL=https://cocobu.online`
   - `NODE_ENV=production`
 - [ ] Configure Prisma connection pool settings in code to use env vars
 - [ ] Verify all required variables are set
@@ -143,10 +143,10 @@ This change is primarily a **planning and documentation** change. Implementation
 **Estimated time**: 25 minutes
 
 ### Task 3.4: Configure custom domain
-- [ ] Add custom domain in Railway: `api.cocobu.com`
+- [ ] Add custom domain in Railway: `api.cocobu.online`
 - [ ] Update DNS CNAME record to Railway target
 - [ ] Wait for SSL certificate provisioning
-- [ ] Verify health check endpoint: `https://api.cocobu.com/health`
+- [ ] Verify health check endpoint: `https://api.cocobu.online/health`
 
 **Validation**: API is accessible at custom domain with SSL
 
@@ -190,7 +190,7 @@ This change is primarily a **planning and documentation** change. Implementation
 **Estimated time**: 10 minutes
 
 ### Task 4.3: Configure CDN for R2 (optional)
-- [ ] Create custom domain for R2 bucket (e.g., `files.cocobu.com`)
+- [ ] Create custom domain for R2 bucket (e.g., `files.cocobu.online`)
 - [ ] Add CNAME DNS record pointing to R2 bucket URL
 - [ ] Configure cache rules in Cloudflare
 - [ ] Test file upload and retrieval via CDN URL
@@ -242,8 +242,8 @@ This change is primarily a **planning and documentation** change. Implementation
 
 ### Task 5.4: Set up uptime monitoring (UptimeRobot)
 - [ ] Sign up for UptimeRobot free account
-- [ ] Create monitor for frontend: `https://cocobu.com`
-- [ ] Create monitor for backend health: `https://api.cocobu.com/health`
+- [ ] Create monitor for frontend: `https://cocobu.online`
+- [ ] Create monitor for backend health: `https://api.cocobu.online/health`
 - [ ] Configure check interval: 5 minutes
 - [ ] Configure alert contacts: Email
 - [ ] Configure alert threshold: 2 consecutive failures
@@ -255,7 +255,7 @@ This change is primarily a **planning and documentation** change. Implementation
 ### Task 5.5: Create public status page
 - [ ] Enable public status page in UptimeRobot
 - [ ] Customize status page branding (optional)
-- [ ] Configure custom domain: `status.cocobu.com` (optional)
+- [ ] Configure custom domain: `status.cocobu.online` (optional)
 - [ ] Add DNS CNAME record if using custom domain
 - [ ] Test status page accessibility
 - [ ] Document status page URL in docs
@@ -341,9 +341,9 @@ This change is primarily a **planning and documentation** change. Implementation
 
 ### Task 7.1: Configure CORS policies
 - [ ] Update NestJS CORS configuration in `main.ts`
-- [ ] Add production domain to allowed origins: `https://cocobu.com`
+- [ ] Add production domain to allowed origins: `https://cocobu.online`
 - [ ] Add localhost for development: `http://localhost:3000`
-- [ ] Add project-specific Vercel preview pattern: `https://*-livhg.vercel.app` or `https://cocobu-*.vercel.app`
+- [ ] Add project-specific Vercel preview pattern: `https://*-livhg.vercel.app` or `https://cocobu-online-*.vercel.app`
 - [ ] Implement origin validation logic to reject overly broad wildcards
 - [ ] Test CORS policy with frontend requests from all allowed origins
 - [ ] Test that `https://random-project.vercel.app` is rejected
@@ -454,7 +454,7 @@ This change is primarily a **planning and documentation** change. Implementation
 - [ ] Test file upload to R2
 - [ ] Verify error tracking in Sentry
 - [ ] Verify uptime monitoring in UptimeRobot
-- [ ] Verify application is accessible via custom domain
+- [ ] Verify application is accessible at cocobu.online
 - [ ] Test with small group of internal users first
 
 **Validation**: Complete user flow works in production with test accounts
@@ -478,7 +478,7 @@ This change is primarily a **planning and documentation** change. Implementation
 **Estimated time**: 30 minutes (review)
 
 ### Task 9.2: Soft launch to production
-- [ ] Deploy to production domain
+- [ ] Deploy to cocobu.online production domain
 - [ ] Test with small group of users (internal team)
 - [ ] Monitor for errors and issues
 - [ ] Verify all systems operational

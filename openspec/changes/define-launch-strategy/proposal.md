@@ -47,10 +47,10 @@ Follow the tech stack defined in project.md:
   - CDN integration for fast delivery
 
 #### 2. Domain Strategy
-- **Domain acquisition**: Register `cocobu.com` via Cloudflare Registrar or Namecheap
-  - Primary domain: `cocobu.com` (apex for frontend)
-  - API subdomain: `api.cocobu.com` (for backend)
-  - WWW redirect: `www.cocobu.com` → `cocobu.com`
+- **Domain acquisition**: Register `cocobu.online` via Cloudflare Registrar or Namecheap
+  - Primary domain: `cocobu.online` (apex for frontend)
+  - API subdomain: `api.cocobu.online` (for backend)
+  - WWW redirect: `www.cocobu.online` → `cocobu.online`
 - **DNS management**: Cloudflare DNS
   - Free SSL/TLS certificates
   - DDoS protection
@@ -60,7 +60,7 @@ Follow the tech stack defined in project.md:
 #### 3. Environment Configuration
 Two environments for MVP simplicity:
 - **Development**: Local Docker (localhost:3000, localhost:4000)
-- **Production**: Live system, `cocobu.com` and `api.cocobu.com`
+- **Production**: Live system, `cocobu.online` and `api.cocobu.online`
 
 **Rationale for no staging**: As an MVP testing market fit, we minimize infrastructure complexity and costs. Staging environment will be added post-MVP when traffic and team size justify it. Development testing on localhost combined with preview deployments (Vercel PR previews) provide sufficient pre-production validation.
 
@@ -172,8 +172,8 @@ Secrets management:
 ## Open Questions
 
 ### Resolved
-1. ✅ **Domain name**: `cocobu.com`
-   - Decision: Use `cocobu.com` for brand recognition and familiarity
+1. ✅ **Domain name**: `cocobu.online`
+   - Decision: Use `cocobu.online` (already registered)
    - Budget: ~$10-15/year
 
 2. ✅ **Backend hosting**: Railway for MVP
