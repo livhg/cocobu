@@ -4,15 +4,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-
-// Temporary type until Prisma client is regenerated
-type User = {
-  id: string;
-  email: string;
-  name: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
+import { UserDto } from '../common/types/user.types';
 
 @ApiTags('Users')
 @Controller('users')
@@ -25,7 +17,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getMe(@CurrentUser() user: User) {
+  async getMe(@CurrentUser() user: UserDto) {
     return {
       id: user.id,
       email: user.email,
@@ -40,7 +32,7 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Profile updated successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async updateMe(
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserDto,
     @Body() updateProfileDto: UpdateProfileDto,
   ) {
     return this.usersService.updateProfile(user.id, updateProfileDto);

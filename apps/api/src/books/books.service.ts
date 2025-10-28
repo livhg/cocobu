@@ -7,47 +7,28 @@ export class BooksService {
   constructor(private prisma: PrismaService) {}
 
   async findUserBooks(userId: string) {
-    // Find books where user is owner or has membership
-    const [ownedBooks, memberBooks] = await Promise.all([
-      this.prisma.book.findMany({
-        where: { ownerId: userId },
-        include: {
-          owner: {
-            select: { id: true, email: true, name: true },
+    // Find books where user is owner or has membership using a single query
+    return this.prisma.book.findMany({
+      where: {
+        OR: [
+          { ownerId: userId },
+          {
+            memberships: {
+              some: { userId },
+            },
           },
-          _count: {
-            select: { memberships: true, entries: true },
-          },
+        ],
+      },
+      include: {
+        owner: {
+          select: { id: true, email: true, name: true },
         },
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.book.findMany({
-        where: {
-          memberships: {
-            some: { userId },
-          },
+        _count: {
+          select: { memberships: true, entries: true },
         },
-        include: {
-          owner: {
-            select: { id: true, email: true, name: true },
-          },
-          _count: {
-            select: { memberships: true, entries: true },
-          },
-        },
-        orderBy: { createdAt: 'desc' },
-      }),
-    ]);
-
-    // Combine and deduplicate books
-    const bookMap = new Map();
-    [...ownedBooks, ...memberBooks].forEach((book) => {
-      if (!bookMap.has(book.id)) {
-        bookMap.set(book.id, book);
-      }
+      },
+      orderBy: { createdAt: 'desc' },
     });
-
-    return Array.from(bookMap.values());
   }
 
   async findById(bookId: string, userId: string) {

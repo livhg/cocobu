@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
@@ -8,6 +8,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
 
   // Security headers
   app.use(helmet());
@@ -16,8 +17,12 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Enable CORS
+  const frontendUrl = process.env.FRONTEND_URL;
+  if (!frontendUrl) {
+    throw new Error('FRONTEND_URL environment variable is required');
+  }
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: frontendUrl,
     credentials: true,
   });
 
@@ -50,8 +55,8 @@ async function bootstrap() {
   const port = process.env.PORT || 4000;
   await app.listen(port);
 
-  console.log(`🚀 API server running on http://localhost:${port}`);
-  console.log(`📚 API docs available at http://localhost:${port}/api/docs`);
+  logger.log(`🚀 API server running on http://localhost:${port}`);
+  logger.log(`📚 API docs available at http://localhost:${port}/api/docs`);
 }
 
 bootstrap();

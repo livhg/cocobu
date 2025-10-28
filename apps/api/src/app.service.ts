@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { getAppVersion } from './common/utils/version';
 
 @Injectable()
 export class AppService {
@@ -7,7 +8,7 @@ export class AppService {
       status: 'ok',
       timestamp: new Date().toISOString(),
       service: 'cocobu-api',
-      version: '0.1.0',
+      version: getAppVersion(),
     };
   }
 }

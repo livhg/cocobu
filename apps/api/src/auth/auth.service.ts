@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../common/services/prisma.service';
@@ -18,7 +18,10 @@ interface SessionPayload {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private transporter: nodemailer.Transporter | null = null;
+  // TODO: Move to Redis for production
+  // Current in-memory storage will lose data on restart and doesn't work in multi-instance deployments
   private magicLinkTokens: Map<string, { email: string; used: boolean; expires: Date }> = new Map();
 
   constructor(
@@ -41,7 +44,7 @@ export class AuthService {
       });
     } else {
       // Development mode: log to console instead of sending email
-      console.log('📧 Email service in development mode - emails will be logged to console');
+      this.logger.log('📧 Email service in development mode - emails will be logged to console');
     }
   }
 
@@ -91,12 +94,12 @@ CocoBu 叩叩簿
       });
     } else {
       // Development mode: log magic link
-      console.log('\n========================================');
-      console.log('📧 Magic Link Email (Development Mode)');
-      console.log('========================================');
-      console.log(`To: ${email}`);
-      console.log(`Magic Link: ${magicLink}`);
-      console.log('========================================\n');
+      this.logger.log('\n========================================');
+      this.logger.log('📧 Magic Link Email (Development Mode)');
+      this.logger.log('========================================');
+      this.logger.log(`To: ${email}`);
+      this.logger.log(`Magic Link: ${magicLink}`);
+      this.logger.log('========================================\n');
     }
 
     return {
@@ -134,46 +137,11 @@ CocoBu 叩叩簿
       throw new UnauthorizedException('Magic link has expired');
     }
 
-    // Mark token as used
-    tokenData.used = true;
+    // Mark token as used and immediately delete it
+    this.magicLinkTokens.delete(token);
 
-    // Find or create user
-    let user = await this.prisma.user.findUnique({
-      where: { email: payload.email },
-    });
-
-    if (!user) {
-      // Create new user
-      user = await this.prisma.user.create({
-        data: {
-          email: payload.email,
-          name: payload.email.split('@')[0], // Default name from email
-        },
-      });
-    }
-
-    // Generate session token (7 days expiry)
-    const sessionPayload: SessionPayload = {
-      type: 'session',
-      sub: user.id,
-      email: user.email,
-    };
-
-    const sessionToken = this.jwtService.sign(sessionPayload, { expiresIn: '7d' });
-
-    // Clean up used magic link token after a delay
-    setTimeout(() => {
-      this.magicLinkTokens.delete(token);
-    }, 60000); // Delete after 1 minute
-
-    return {
-      accessToken: sessionToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      },
-    };
+    // Create session for user
+    return this.createSessionForUser(payload.email);
   }
 
   async validateUser(userId: string) {
@@ -188,12 +156,8 @@ CocoBu 叩叩簿
     return user;
   }
 
-  // Development-only: Direct login without email
-  async devLogin(email: string) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new BadRequestException('Dev login is only available in development mode');
-    }
-
+  // Helper method to create or get user and generate session token
+  private async createSessionForUser(email: string) {
     let user = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -223,5 +187,14 @@ CocoBu 叩叩簿
         name: user.name,
       },
     };
+  }
+
+  // Development-only: Direct login without email
+  async devLogin(email: string) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new BadRequestException('Dev login is only available in development mode');
+    }
+
+    return this.createSessionForUser(email);
   }
 }

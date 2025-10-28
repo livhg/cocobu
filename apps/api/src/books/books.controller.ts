@@ -17,15 +17,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
-
-// Temporary type until Prisma client is regenerated
-type User = {
-  id: string;
-  email: string;
-  name: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
+import { UserDto } from '../common/types/user.types';
 
 @ApiTags('Books')
 @Controller('books')
@@ -38,7 +30,7 @@ export class BooksController {
   @ApiOperation({ summary: 'Get all books for current user' })
   @ApiResponse({ status: 200, description: 'Books retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findAll(@CurrentUser() user: User) {
+  async findAll(@CurrentUser() user: UserDto) {
     return this.booksService.findUserBooks(user.id);
   }
 
@@ -47,7 +39,7 @@ export class BooksController {
   @ApiResponse({ status: 200, description: 'Book retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Book not found' })
   @ApiResponse({ status: 403, description: 'Access denied' })
-  async findOne(@Param('id') id: string, @CurrentUser() user: User) {
+  async findOne(@Param('id') id: string, @CurrentUser() user: UserDto) {
     return this.booksService.findById(id, user.id);
   }
 
@@ -56,7 +48,7 @@ export class BooksController {
   @ApiResponse({ status: 201, description: 'Book created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
   async create(
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserDto,
     @Body() createBookDto: CreateBookDto,
   ) {
     return this.booksService.create(user.id, createBookDto);
@@ -67,7 +59,7 @@ export class BooksController {
   @ApiResponse({ status: 200, description: 'Book deleted successfully' })
   @ApiResponse({ status: 404, description: 'Book not found' })
   @ApiResponse({ status: 403, description: 'Only owner can delete' })
-  async delete(@Param('id') id: string, @CurrentUser() user: User) {
+  async delete(@Param('id') id: string, @CurrentUser() user: UserDto) {
     return this.booksService.delete(id, user.id);
   }
 }
