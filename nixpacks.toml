@@ -1,0 +1,16 @@
+[phases.setup]
+nixPkgs = ["nodejs_18", "npm"]
+
+[phases.install]
+cmds = [
+  "npm ci --include=dev"
+]
+
+[phases.build]
+cmds = [
+  "npm run db:generate",
+  "npm run build --workspace=@cocobu/api"
+]
+
+[start]
+cmd = "npm run start --workspace=@cocobu/api"
