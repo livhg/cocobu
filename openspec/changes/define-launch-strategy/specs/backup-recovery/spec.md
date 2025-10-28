@@ -233,7 +233,7 @@ The system SHALL maintain public status page and communication channels for tran
 
 #### Scenario: Status page availability
 - **GIVEN** application is deployed
-- **WHEN** users visit status page (e.g., status.cocobu.com)
+- **WHEN** users visit status page (e.g., status.cocobu.online)
 - **THEN** page SHALL show current operational status (operational, degraded, outage)
 - **AND** page SHALL show status of each component (web, API, database)
 - **AND** page SHALL show historical uptime statistics

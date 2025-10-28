@@ -14,7 +14,7 @@ The system SHALL use a registered domain name for production deployment with cle
 - **GIVEN** project is ready for deployment
 - **WHEN** domain is registered
 - **THEN** domain SHALL be registered via Cloudflare Registrar or Namecheap
-- **AND** domain SHALL be either `cocobu.com` (preferred) or `cocobu.app`
+- **AND** domain SHALL be `cocobu.online` (registered)
 - **AND** registration SHALL be for minimum 1 year with auto-renewal enabled
 - **AND** domain registrant SHALL be project owner with valid contact information
 
@@ -66,10 +66,10 @@ The system SHALL organize services using subdomain hierarchy for clear separatio
 #### Scenario: Production domain structure
 - **GIVEN** production environment is configured
 - **WHEN** DNS records are created
-- **THEN** apex domain SHALL serve frontend: `cocobu.com` → Vercel
-- **AND** API subdomain SHALL serve backend: `api.cocobu.com` → Railway
+- **THEN** apex domain SHALL serve frontend: `cocobu.online` → Vercel
+- **AND** API subdomain SHALL serve backend: `api.cocobu.online` → Railway
 - **AND** all HTTP requests SHALL redirect to HTTPS
-- **AND** www subdomain SHALL redirect to apex: `www.cocobu.com` → `cocobu.com`
+- **AND** www subdomain SHALL redirect to apex: `www.cocobu.online` → `cocobu.online`
 
 #### Scenario: Development uses localhost
 - **GIVEN** developer is working locally
@@ -121,8 +121,8 @@ The system SHALL configure Cross-Origin Resource Sharing (CORS) to allow fronten
 
 #### Scenario: Production CORS policy
 - **GIVEN** backend API is running in production
-- **WHEN** request originates from `cocobu.com`
-- **THEN** API SHALL include header: `Access-Control-Allow-Origin: https://cocobu.com`
+- **WHEN** request originates from `cocobu.online`
+- **THEN** API SHALL include header: `Access-Control-Allow-Origin: https://cocobu.online`
 - **AND** API SHALL include header: `Access-Control-Allow-Credentials: true`
 - **AND** API SHALL allow methods: GET, POST, PUT, DELETE, PATCH, OPTIONS
 - **AND** API SHALL allow headers: Content-Type, Authorization, Cookie
@@ -137,7 +137,7 @@ The system SHALL configure Cross-Origin Resource Sharing (CORS) to allow fronten
 - **GIVEN** Vercel preview deployment is created
 - **WHEN** preview frontend requests API
 - **THEN** production API SHALL accept requests from project-specific Vercel preview domains
-- **AND** preview domain pattern SHALL be whitelisted using strict pattern: `https://*-livhg.vercel.app` or `https://cocobu-*.vercel.app`
+- **AND** preview domain pattern SHALL be whitelisted using strict pattern: `https://*-livhg.vercel.app` or `https://cocobu-online-*.vercel.app`
 - **AND** CORS SHALL NOT accept wildcards that permit arbitrary Vercel projects
 - **AND** CORS configuration SHALL validate origin against project/organization-specific pattern
 - **AND** preview requests SHALL use read-only mode to prevent production data modification
@@ -166,7 +166,7 @@ The system SHALL implement DNSSEC and CAA records to prevent DNS hijacking and u
 - **GIVEN** domain requires SSL certificates
 - **WHEN** CAA record is created
 - **THEN** CAA record SHALL authorize Let's Encrypt: `0 issue "letsencrypt.org"`
-- **AND** CAA record SHALL include reporting: `0 iodef "mailto:security@cocobu.com"`
+- **AND** CAA record SHALL include reporting: `0 iodef "mailto:security@cocobu.online"`
 - **AND** unauthorized CAs SHALL be prevented from issuing certificates
 - **AND** CAA violations SHALL be reported to specified email
 
@@ -199,7 +199,7 @@ The system SHALL configure DNS records for email delivery to support magic link 
 #### Scenario: DMARC policy configuration
 - **GIVEN** SPF and DKIM are configured
 - **WHEN** DMARC record is created
-- **THEN** TXT record SHALL be added: `v=DMARC1; p=quarantine; rua=mailto:dmarc@cocobu.com`
+- **THEN** TXT record SHALL be added: `v=DMARC1; p=quarantine; rua=mailto:dmarc@cocobu.online`
 - **AND** policy SHALL be set to `quarantine` (not `reject` initially)
 - **AND** aggregate reports SHALL be sent to specified email
 - **AND** policy SHALL be monitored and adjusted to `reject` after validation
