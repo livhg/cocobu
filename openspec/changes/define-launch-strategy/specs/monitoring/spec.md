@@ -89,8 +89,8 @@ The system SHALL use UptimeRobot for HTTP endpoint monitoring with alert notific
 #### Scenario: Production endpoint monitoring
 - **GIVEN** production application is deployed
 - **WHEN** UptimeRobot checks are configured
-- **THEN** monitors SHALL check `cocobu.com` every 5 minutes
-- **AND** monitors SHALL check `api.cocobu.com/health` every 5 minutes
+- **THEN** monitors SHALL check `cocobu.online` every 5 minutes
+- **AND** monitors SHALL check `api.cocobu.online/health` every 5 minutes
 - **AND** monitors SHALL expect 200 status code
 - **AND** monitors SHALL timeout after 30 seconds
 

@@ -14,7 +14,7 @@ The system SHALL deploy the Next.js frontend application to Vercel with automati
 - **GIVEN** code is merged to main branch
 - **WHEN** GitHub push occurs
 - **THEN** Vercel SHALL automatically build and deploy to production
-- **AND** deployment SHALL be accessible at `cocobu.com`
+- **AND** deployment SHALL be accessible at `cocobu.online`
 - **AND** deployment SHALL complete within 3 minutes
 - **AND** previous deployment SHALL remain active until new deployment is verified
 
@@ -41,7 +41,7 @@ The system SHALL deploy the NestJS backend application to Railway with MySQL dat
 - **WHEN** Railway webhook receives push notification
 - **THEN** Railway SHALL build Docker image from Dockerfile
 - **AND** Railway SHALL deploy to production environment
-- **AND** deployment SHALL be accessible at `api.cocobu.com`
+- **AND** deployment SHALL be accessible at `api.cocobu.online`
 - **AND** health check endpoint SHALL return 200 status before routing traffic
 
 #### Scenario: Zero-downtime deployment
@@ -155,7 +155,7 @@ The system SHALL maintain two isolated environments: development and production.
 #### Scenario: Production environment
 - **GIVEN** code is merged to `main` branch
 - **WHEN** deployment triggers
-- **THEN** application SHALL deploy to `cocobu.com` and `api.cocobu.com`
+- **THEN** application SHALL deploy to `cocobu.online` and `api.cocobu.online`
 - **AND** application SHALL use production environment variables
 - **AND** application SHALL connect to production database
 - **AND** dev-mode features SHALL be disabled
