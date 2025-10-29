@@ -5,41 +5,44 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seed...');
 
-  // Clean existing data
+  // Clean existing data in a transaction to ensure atomicity
   console.log('🧹 Cleaning existing data...');
-  await prisma.allocation.deleteMany();
-  await prisma.split.deleteMany();
-  await prisma.entry.deleteMany();
-  await prisma.settlement.deleteMany();
-  await prisma.category.deleteMany();
-  await prisma.membership.deleteMany();
-  await prisma.book.deleteMany();
-  await prisma.user.deleteMany();
+  await prisma.$transaction([
+    prisma.allocation.deleteMany(),
+    prisma.split.deleteMany(),
+    prisma.entry.deleteMany(),
+    prisma.settlement.deleteMany(),
+    prisma.category.deleteMany(),
+    prisma.membership.deleteMany(),
+    prisma.book.deleteMany(),
+    prisma.user.deleteMany(),
+  ]);
 
-  // Create sample users
+  // Create sample users in parallel
   console.log('👤 Creating sample users...');
-  const alice = await prisma.user.create({
-    data: {
-      email: 'alice@example.com',
-      name: 'Alice',
-    },
-  });
+  const [alice, bob, charlie] = await Promise.all([
+    prisma.user.create({
+      data: {
+        email: 'alice@example.com',
+        name: 'Alice',
+      },
+    }),
+    prisma.user.create({
+      data: {
+        email: 'bob@example.com',
+        name: 'Bob',
+      },
+    }),
+    prisma.user.create({
+      data: {
+        email: 'charlie@example.com',
+        name: 'Charlie',
+      },
+    }),
+  ]);
 
-  const bob = await prisma.user.create({
-    data: {
-      email: 'bob@example.com',
-      name: 'Bob',
-    },
-  });
-
-  const charlie = await prisma.user.create({
-    data: {
-      email: 'charlie@example.com',
-      name: 'Charlie',
-    },
-  });
-
-  console.log(`✅ Created ${3} users`);
+  const users = [alice, bob, charlie];
+  console.log(`✅ Created ${users.length} users`);
 
   // Create personal book for Alice
   console.log('📚 Creating personal books...');
@@ -108,66 +111,70 @@ async function main() {
     },
   });
 
-  console.log(`✅ Created ${3} books`);
+  const books = [alicePersonalBook, tripBook, householdBook];
+  console.log(`✅ Created ${books.length} books`);
 
-  // Create categories
+  // Create categories in parallel
   console.log('🏷️ Creating categories...');
-  const foodCategory = await prisma.category.create({
-    data: {
-      bookId: tripBook.id,
-      name: 'Food & Drinks',
-      color: '#FF6B6B',
-      icon: '🍔',
-    },
-  });
+  const [foodCategory, transportCategory, accommodationCategory] =
+    await Promise.all([
+      prisma.category.create({
+        data: {
+          bookId: tripBook.id,
+          name: 'Food & Drinks',
+          color: '#FF6B6B',
+          icon: '🍔',
+        },
+      }),
+      prisma.category.create({
+        data: {
+          bookId: tripBook.id,
+          name: 'Transportation',
+          color: '#4ECDC4',
+          icon: '🚗',
+        },
+      }),
+      prisma.category.create({
+        data: {
+          bookId: tripBook.id,
+          name: 'Accommodation',
+          color: '#95E1D3',
+          icon: '🏨',
+        },
+      }),
+    ]);
 
-  const transportCategory = await prisma.category.create({
-    data: {
-      bookId: tripBook.id,
-      name: 'Transportation',
-      color: '#4ECDC4',
-      icon: '🚗',
-    },
-  });
-
-  const accommodationCategory = await prisma.category.create({
-    data: {
-      bookId: tripBook.id,
-      name: 'Accommodation',
-      color: '#95E1D3',
-      icon: '🏨',
-    },
-  });
-
-  console.log(`✅ Created ${3} categories`);
+  const categories = [foodCategory, transportCategory, accommodationCategory];
+  console.log(`✅ Created ${categories.length} categories`);
 
   // Create entries for personal book
   console.log('💰 Creating personal entries...');
-  await prisma.entry.create({
-    data: {
-      bookId: alicePersonalBook.id,
-      creatorId: alice.id,
-      amount: 150.5,
-      currency: 'TWD',
-      occurredOn: new Date('2025-10-15'),
-      categoryId: null,
-      note: 'Morning coffee',
-    },
-  });
+  const personalEntries = await Promise.all([
+    prisma.entry.create({
+      data: {
+        bookId: alicePersonalBook.id,
+        creatorId: alice.id,
+        amount: 150.5,
+        currency: 'TWD',
+        occurredOn: new Date('2025-10-15'),
+        categoryId: null,
+        note: 'Morning coffee',
+      },
+    }),
+    prisma.entry.create({
+      data: {
+        bookId: alicePersonalBook.id,
+        creatorId: alice.id,
+        amount: 850.0,
+        currency: 'TWD',
+        occurredOn: new Date('2025-10-16'),
+        categoryId: null,
+        note: 'Grocery shopping',
+      },
+    }),
+  ]);
 
-  await prisma.entry.create({
-    data: {
-      bookId: alicePersonalBook.id,
-      creatorId: alice.id,
-      amount: 850.0,
-      currency: 'TWD',
-      occurredOn: new Date('2025-10-16'),
-      categoryId: null,
-      note: 'Grocery shopping',
-    },
-  });
-
-  console.log(`✅ Created ${2} personal entries`);
+  console.log(`✅ Created ${personalEntries.length} personal entries`);
 
   // Create entries for split book (trip)
   console.log('💰 Creating split book entries...');
@@ -283,10 +290,13 @@ async function main() {
     },
   });
 
-  console.log(`✅ Created ${3} split book entries with allocations`);
+  const splitEntries = [hotelEntry, dinnerEntry, gasEntry];
+  console.log(
+    `✅ Created ${splitEntries.length} split book entries with allocations`,
+  );
 
   // Create entries for household book
-  await prisma.entry.create({
+  const householdEntry = await prisma.entry.create({
     data: {
       bookId: householdBook.id,
       creatorId: bob.id,
@@ -316,15 +326,25 @@ async function main() {
     },
   });
 
-  console.log(`✅ Created ${1} household entry`);
+  const householdEntries = [householdEntry];
+  console.log(`✅ Created ${householdEntries.length} household entry`);
+
+  const totalEntries =
+    personalEntries.length + splitEntries.length + householdEntries.length;
 
   console.log('\n🎉 Database seeding completed successfully!');
   console.log('\n📊 Summary:');
-  console.log(`   - Users: 3`);
-  console.log(`   - Books: 3 (1 personal, 2 split)`);
-  console.log(`   - Categories: 3`);
-  console.log(`   - Entries: 7 (2 personal, 5 with splits)`);
-  console.log(`   - Memberships: 7`);
+  console.log(`   - Users: ${users.length}`);
+  console.log(`   - Books: ${books.length} (1 personal, 2 split)`);
+  console.log(`   - Categories: ${categories.length}`);
+  console.log(
+    `   - Entries: ${totalEntries} (${personalEntries.length} personal, ${splitEntries.length + householdEntries.length} with splits)`,
+  );
+
+  // Count memberships dynamically
+  const membershipCount = await prisma.membership.count();
+  console.log(`   - Memberships: ${membershipCount}`);
+
   console.log('\n💡 Test accounts:');
   console.log(`   - alice@example.com (1 personal book + 1 split book)`);
   console.log(`   - bob@example.com (2 split books)`);
@@ -332,11 +352,10 @@ async function main() {
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
+  .catch((e) => {
     console.error('❌ Error during seeding:', e);
-    await prisma.$disconnect();
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });
