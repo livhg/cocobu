@@ -149,7 +149,7 @@ CocoBu 叩叩簿
 
         if (!tokenData) {
           throw new UnauthorizedException(
-            'Magic link not found or already used',
+            'Magic link not found or already used'
           );
         }
 

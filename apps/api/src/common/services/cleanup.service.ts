@@ -25,9 +25,7 @@ export class CleanupService {
       });
 
       if (result.count > 0) {
-        this.logger.log(
-          `Cleaned up ${result.count} expired magic link tokens`,
-        );
+        this.logger.log(`Cleaned up ${result.count} expired magic link tokens`);
       }
     } catch (error) {
       this.logger.error('Failed to clean up expired magic link tokens', error);
