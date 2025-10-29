@@ -24,13 +24,13 @@ export class RateLimitGuard implements CanActivate {
 
   constructor(
     private reflector: Reflector,
-    private prisma: PrismaService,
+    private prisma: PrismaService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const rateLimitOptions = this.reflector.get(
       RateLimit,
-      context.getHandler(),
+      context.getHandler()
     );
 
     if (!rateLimitOptions) {
@@ -50,7 +50,7 @@ export class RateLimitGuard implements CanActivate {
     // Calculate the current window start (rounded to the nearest window)
     const now = new Date();
     const windowStart = new Date(
-      Math.floor(now.getTime() / (duration * 1000)) * (duration * 1000),
+      Math.floor(now.getTime() / (duration * 1000)) * (duration * 1000)
     );
 
     try {
@@ -78,11 +78,11 @@ export class RateLimitGuard implements CanActivate {
       // So we check if the current count (before this request) is >= points
       if (rateLimit.count >= points) {
         const retryAfter = Math.ceil(
-          (windowStart.getTime() + duration * 1000 - now.getTime()) / 1000,
+          (windowStart.getTime() + duration * 1000 - now.getTime()) / 1000
         );
 
         this.logger.warn(
-          `Rate limit exceeded for email: ${email} (${rateLimit.count + 1}/${points} requests)`,
+          `Rate limit exceeded for email: ${email} (${rateLimit.count + 1}/${points} requests)`
         );
 
         throw new HttpException(
@@ -97,7 +97,7 @@ export class RateLimitGuard implements CanActivate {
             cause: {
               retryAfter,
             },
-          },
+          }
         );
       }
 
@@ -117,7 +117,7 @@ export class RateLimitGuard implements CanActivate {
           message: 'Rate limit system unavailable. Please try again later.',
           error: 'Internal Server Error',
         },
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
