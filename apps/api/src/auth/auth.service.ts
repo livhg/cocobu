@@ -138,34 +138,50 @@ CocoBu 叩叩簿
     // Hash the token to look it up in the database
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
-    // Check if token exists in database
-    const tokenData = await this.prisma.magicLinkToken.findUnique({
-      where: { tokenHash },
-    });
+    // Use atomic transaction to prevent race conditions
+    // This ensures only one request can successfully mark the token as used
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        // Check if token exists and get it atomically
+        const tokenData = await tx.magicLinkToken.findUnique({
+          where: { tokenHash },
+        });
 
-    if (!tokenData) {
-      throw new UnauthorizedException('Magic link not found or already used');
-    }
+        if (!tokenData) {
+          throw new UnauthorizedException(
+            'Magic link not found or already used',
+          );
+        }
 
-    if (tokenData.used) {
-      throw new UnauthorizedException('Magic link has already been used');
-    }
+        if (tokenData.used) {
+          throw new UnauthorizedException('Magic link has already been used');
+        }
 
-    if (tokenData.expiresAt < new Date()) {
-      // Clean up expired token
-      await this.prisma.magicLinkToken.delete({
-        where: { tokenHash },
+        if (tokenData.expiresAt < new Date()) {
+          // Clean up expired token
+          await tx.magicLinkToken.delete({
+            where: { tokenHash },
+          });
+          throw new UnauthorizedException('Magic link has expired');
+        }
+
+        // Mark token as used atomically within the transaction
+        await tx.magicLinkToken.update({
+          where: { tokenHash },
+          data: { used: true },
+        });
       });
-      throw new UnauthorizedException('Magic link has expired');
+    } catch (error) {
+      // Re-throw UnauthorizedException as-is
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      // Log and throw for unexpected errors
+      this.logger.error('Failed to verify magic link token', error);
+      throw new UnauthorizedException('Failed to verify magic link');
     }
 
-    // Mark token as used (single-use enforcement)
-    await this.prisma.magicLinkToken.update({
-      where: { tokenHash },
-      data: { used: true },
-    });
-
-    // Create session for user
+    // Create session for user (outside transaction)
     return this.createSessionForUser(payload.email);
   }
 

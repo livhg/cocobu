@@ -14,7 +14,6 @@ export const RATE_LIMIT_KEY = 'rateLimit';
 export interface RateLimitOptions {
   points: number;
   duration: number; // in seconds
-  keyPrefix: string;
 }
 
 export const RateLimit = Reflector.createDecorator<RateLimitOptions>();
@@ -55,69 +54,71 @@ export class RateLimitGuard implements CanActivate {
     );
 
     try {
-      // Find or create rate limit record for this email and window
-      const rateLimit = await this.prisma.rateLimit.findUnique({
+      // Use atomic upsert to prevent race conditions
+      // This ensures accurate counting even with concurrent requests
+      const rateLimit = await this.prisma.rateLimit.upsert({
         where: {
           email_windowStart: {
             email,
             windowStart,
           },
         },
+        update: {
+          count: { increment: 1 },
+        },
+        create: {
+          email,
+          windowStart,
+          count: 1,
+        },
       });
 
-      if (rateLimit) {
-        // Check if limit exceeded
-        if (rateLimit.count >= points) {
-          const retryAfter = Math.ceil(
-            (windowStart.getTime() + duration * 1000 - now.getTime()) / 1000,
-          );
+      // Check if limit exceeded after increment
+      // Note: count reflects the value BEFORE increment due to upsert behavior
+      // So we check if the current count (before this request) is >= points
+      if (rateLimit.count >= points) {
+        const retryAfter = Math.ceil(
+          (windowStart.getTime() + duration * 1000 - now.getTime()) / 1000,
+        );
 
-          this.logger.warn(
-            `Rate limit exceeded for email: ${email} (${rateLimit.count}/${points} requests)`,
-          );
+        this.logger.warn(
+          `Rate limit exceeded for email: ${email} (${rateLimit.count + 1}/${points} requests)`,
+        );
 
-          throw new HttpException(
-            {
-              statusCode: HttpStatus.TOO_MANY_REQUESTS,
-              message: `Too many requests. Please try again in ${retryAfter} seconds.`,
-              error: 'Too Many Requests',
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.TOO_MANY_REQUESTS,
+            message: `Too many requests. Please try again in ${retryAfter} seconds.`,
+            error: 'Too Many Requests',
+            retryAfter,
+          },
+          HttpStatus.TOO_MANY_REQUESTS,
+          {
+            cause: {
               retryAfter,
             },
-            HttpStatus.TOO_MANY_REQUESTS,
-            {
-              cause: {
-                retryAfter,
-              },
-            },
-          );
-        }
-
-        // Increment count
-        await this.prisma.rateLimit.update({
-          where: { id: rateLimit.id },
-          data: { count: { increment: 1 } },
-        });
-      } else {
-        // Create new rate limit record
-        await this.prisma.rateLimit.create({
-          data: {
-            email,
-            windowStart,
-            count: 1,
           },
-        });
+        );
       }
 
       return true;
     } catch (error) {
-      // Re-throw HTTP exceptions
+      // Re-throw HTTP exceptions (like TOO_MANY_REQUESTS)
       if (error instanceof HttpException) {
         throw error;
       }
 
-      // Log other errors but allow the request
-      this.logger.error('Rate limit check failed', error);
-      return true;
+      // FAIL CLOSED: Block requests when rate limit system is unavailable
+      // This prevents bypassing rate limits during database outages
+      this.logger.error('Rate limit check failed - blocking request', error);
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Rate limit system unavailable. Please try again later.',
+          error: 'Internal Server Error',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

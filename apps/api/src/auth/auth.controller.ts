@@ -44,11 +44,12 @@ export class AuthController {
   @Post('login')
   @HttpCode(200)
   @UseGuards(RateLimitGuard)
-  @RateLimit({ points: 3, duration: 3600, keyPrefix: 'auth' })
+  @RateLimit({ points: 3, duration: 3600 })
   @ApiOperation({ summary: 'Request magic link login' })
   @ApiResponse({ status: 200, description: 'Magic link sent successfully' })
   @ApiResponse({ status: 400, description: 'Invalid email' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
+  @ApiResponse({ status: 500, description: 'Rate limit system unavailable' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
