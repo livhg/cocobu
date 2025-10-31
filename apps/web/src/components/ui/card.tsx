@@ -8,6 +8,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
+      // Mobile-optimized: larger touch areas, adequate spacing
       'rounded-lg border border-gray-200 bg-white text-gray-950 shadow-sm',
       className
     )}
@@ -22,7 +23,8 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex flex-col space-y-1.5 p-6', className)}
+    // Mobile-first: responsive padding (p-4 on mobile, p-6 on larger screens)
+    className={cn('flex flex-col space-y-1.5 p-4 sm:p-6', className)}
     {...props}
   />
 ));
@@ -35,7 +37,8 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      'text-2xl font-semibold leading-none tracking-tight',
+      // Mobile-readable: base text-xl, larger on desktop
+      'text-xl sm:text-2xl font-semibold leading-none tracking-tight',
       className
     )}
     {...props}
@@ -47,7 +50,12 @@ const CardDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p ref={ref} className={cn('text-sm text-gray-500', className)} {...props} />
+  <p
+    ref={ref}
+    // Mobile-readable: base text size (16px minimum)
+    className={cn('text-base text-gray-500', className)}
+    {...props}
+  />
 ));
 CardDescription.displayName = 'CardDescription';
 
@@ -55,7 +63,12 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+  <div
+    ref={ref}
+    // Mobile-first: responsive padding
+    className={cn('p-4 pt-0 sm:p-6 sm:pt-0', className)}
+    {...props}
+  />
 ));
 CardContent.displayName = 'CardContent';
 
@@ -65,7 +78,8 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex items-center p-6 pt-0', className)}
+    // Mobile-first: responsive padding, adequate spacing for touch targets
+    className={cn('flex items-center gap-2 p-4 pt-0 sm:p-6 sm:pt-0', className)}
     {...props}
   />
 ));
