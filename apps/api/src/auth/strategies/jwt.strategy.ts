@@ -17,6 +17,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     configService: ConfigService,
     private prisma: PrismaService
   ) {
+    const isProduction = configService.get('NODE_ENV') === 'production';
+    const jwtSecret = configService.get<string>('JWT_SECRET');
+
+    // In production, JWT_SECRET must be set
+    if (isProduction && !jwtSecret) {
+      throw new Error('JWT_SECRET must be set in production environment');
+    }
+
+    // In development, use a default secret if not provided
+    const secret = jwtSecret || 'dev-secret-change-in-production-use-openssl-rand-hex-32';
+
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
@@ -26,7 +37,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
-      secretOrKey: configService.getOrThrow<string>('JWT_SECRET'),
+      secretOrKey: secret,
     });
   }
 
