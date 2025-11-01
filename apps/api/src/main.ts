@@ -23,9 +23,12 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Enable CORS
-  const frontendUrl = process.env.FRONTEND_URL;
-  if (!frontendUrl) {
-    throw new Error('FRONTEND_URL environment variable is required');
+  const frontendUrl =
+    process.env.FRONTEND_URL ?? 'http://localhost:3000';
+  if (!process.env.FRONTEND_URL) {
+    logger.warn(
+      'FRONTEND_URL environment variable is not set. Falling back to http://localhost:3000.'
+    );
   }
   app.enableCors({
     origin: frontendUrl,
