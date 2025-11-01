@@ -74,14 +74,16 @@ function VerifyContent() {
 
   if (status === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>驗證中...</CardTitle>
-            <CardDescription>正在驗證您的登入連結</CardDescription>
+            <CardTitle className="text-xl md:text-2xl">驗證中...</CardTitle>
+            <CardDescription className="text-base">
+              正在驗證您的登入連結
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-center py-8">
+            <div className="flex items-center justify-center py-6 md:py-8">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900"></div>
             </div>
           </CardContent>
@@ -92,15 +94,17 @@ function VerifyContent() {
 
   if (status === 'success') {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>登入成功！</CardTitle>
-            <CardDescription>正在導向控制台...</CardDescription>
+            <CardTitle className="text-xl md:text-2xl">登入成功！</CardTitle>
+            <CardDescription className="text-base">
+              正在導向控制台...
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-center py-8">
-              <CheckCircle2 className="h-16 w-16 text-green-500" />
+            <div className="flex items-center justify-center py-6 md:py-8">
+              <CheckCircle2 className="h-12 w-12 text-green-500 md:h-16 md:w-16" />
             </div>
           </CardContent>
         </Card>
@@ -110,20 +114,22 @@ function VerifyContent() {
 
   // Error state
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>驗證失敗</CardTitle>
-          <CardDescription>無法驗證您的登入連結</CardDescription>
+          <CardTitle className="text-xl md:text-2xl">驗證失敗</CardTitle>
+          <CardDescription className="text-base">
+            無法驗證您的登入連結
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {error && (
               <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
                 {error}
               </div>
             )}
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 md:text-base">
               此連結可能已過期或已被使用。請重新請求登入連結。
             </p>
             <div className="flex flex-col gap-2">
@@ -145,14 +151,16 @@ export default function VerifyPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
           <Card className="w-full max-w-md">
             <CardHeader>
-              <CardTitle>載入中...</CardTitle>
-              <CardDescription>正在準備驗證頁面</CardDescription>
+              <CardTitle className="text-xl md:text-2xl">載入中...</CardTitle>
+              <CardDescription className="text-base">
+                正在準備驗證頁面
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-center py-8">
+              <div className="flex items-center justify-center py-6 md:py-8">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900"></div>
               </div>
             </CardContent>

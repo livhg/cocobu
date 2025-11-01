@@ -4,7 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 touch-target',
   {
     variants: {
       variant: {
@@ -17,10 +17,11 @@ const buttonVariants = cva(
         link: 'text-gray-900 underline-offset-4 hover:underline',
       },
       size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-9 rounded-md px-3',
-        lg: 'h-11 rounded-md px-8',
-        icon: 'h-10 w-10',
+        // Updated to meet 44px minimum touch target (WCAG 2.1 AAA)
+        default: 'h-11 px-4 py-2', // 44px height
+        sm: 'h-11 rounded-md px-3', // 44px height (kept same as default for touch)
+        lg: 'h-12 rounded-md px-8', // 48px height (larger than minimum)
+        icon: 'h-11 w-11', // 44px x 44px
       },
     },
     defaultVariants: {
