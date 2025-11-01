@@ -2,6 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  /* Mobile-optimized typography */
+  html {
+    /* 16px base - prevents iOS zoom on input focus */
+    font-size: 16px;
+    /* Better font rendering on all devices */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Improve text rendering */
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    /* Base font with good readability */
+    font-family:
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      'Helvetica Neue',
+      Arial,
+      sans-serif;
+    /* Line height for comfortable reading */
+    line-height: 1.5;
+    /* Prevent text size adjustment on iOS */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Improve heading readability */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  /* Better paragraph spacing on mobile */
+  p {
+    margin-bottom: 1rem;
+  }
+
+  /* Improve link tap targets */
+  a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
