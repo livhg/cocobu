@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Trash2, Edit, MoreVertical } from 'lucide-react';
+import { Trash2, Edit } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -23,7 +23,6 @@ interface BookCardProps {
 }
 
 export function BookCard({ book, onDelete, onEdit }: BookCardProps) {
-  const [swipeOffset, setSwipeOffset] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showContextMenu, setShowContextMenu] = useState(false);
 
@@ -85,9 +84,6 @@ export function BookCard({ book, onDelete, onEdit }: BookCardProps) {
           'relative bg-white transition-transform',
           isDeleting && 'translate-x-full opacity-0'
         )}
-        style={{
-          transform: `translateX(${swipeOffset}px)`,
-        }}
       >
         <Link href={`/dashboard/books/${book.id}`}>
           <Card className="transition-shadow hover:shadow-md">

@@ -4,19 +4,14 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { api, type Book } from '@/lib/api';
 import { FloatingActionButton } from '@/components/navigation/FloatingActionButton';
 import { BookCard } from '@/components/dashboard/BookCard';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/ui/PullToRefreshIndicator';
 import { BottomSheet } from '@/components/ui/BottomSheet';
+import { SkeletonCard } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -61,8 +56,23 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-8 md:py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900"></div>
+      <div className="space-y-4 md:space-y-6">
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold md:text-3xl">我的帳本</h1>
+            <p className="text-sm text-gray-600 md:text-base">
+              管理您的個人帳本與分帳帳本
+            </p>
+          </div>
+        </div>
+
+        {/* Skeleton loading */}
+        <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       </div>
     );
   }
