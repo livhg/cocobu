@@ -17,6 +17,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     configService: ConfigService,
     private prisma: PrismaService
   ) {
+    const jwtConfig = configService.get('jwt');
+
+    if (!jwtConfig || !jwtConfig.secret) {
+      throw new Error('JWT configuration not loaded properly');
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
@@ -26,7 +32,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
-      secretOrKey: configService.getOrThrow<string>('JWT_SECRET'),
+      secretOrKey: jwtConfig.secret,
     });
   }
 
