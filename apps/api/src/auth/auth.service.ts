@@ -7,6 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../common/services/prisma.service';
+import type { Prisma } from '@cocobu/database';
 import { LoginDto } from './dto/login.dto';
 import { AUTH_CONSTANTS } from '../common/constants/auth.constants';
 import * as nodemailer from 'nodemailer';
@@ -141,7 +142,7 @@ CocoBu 叩叩簿
     // Use atomic transaction to prevent race conditions
     // This ensures only one request can successfully mark the token as used
     try {
-      await this.prisma.$transaction(async (tx) => {
+      await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         // Check if token exists and get it atomically
         const tokenData = await tx.magicLinkToken.findUnique({
           where: { tokenHash },
