@@ -17,12 +17,6 @@ export class UsersService {
     return user;
   }
 
-  async findByEmail(email: string) {
-    return this.prisma.user.findUnique({
-      where: { email },
-    });
-  }
-
   async updateProfile(userId: string, data: { name?: string }) {
     return this.prisma.user.update({
       where: { id: userId },

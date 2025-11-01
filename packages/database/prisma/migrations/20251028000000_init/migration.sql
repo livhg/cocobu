@@ -108,33 +108,6 @@ CREATE TABLE `categories` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- CreateTable
-CREATE TABLE `magic_link_tokens` (
-    `id` CHAR(36) NOT NULL,
-    `token_hash` CHAR(64) NOT NULL,
-    `email` VARCHAR(255) NOT NULL,
-    `used` BOOLEAN NOT NULL DEFAULT false,
-    `expires_at` DATETIME(3) NOT NULL,
-    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-
-    UNIQUE INDEX `magic_link_tokens_token_hash_key`(`token_hash`),
-    INDEX `magic_link_tokens_expires_at_idx`(`expires_at`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `rate_limits` (
-    `id` CHAR(36) NOT NULL,
-    `email` VARCHAR(255) NOT NULL,
-    `count` INTEGER NOT NULL DEFAULT 1,
-    `window_start` DATETIME(3) NOT NULL,
-    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-
-    INDEX `rate_limits_email_window_start_idx`(`email`, `window_start`),
-    UNIQUE INDEX `rate_limits_email_window_start_key`(`email`, `window_start`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
 -- AddForeignKey
 ALTER TABLE `books` ADD CONSTRAINT `books_owner_id_fkey` FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 

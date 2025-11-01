@@ -118,7 +118,6 @@ npm run build --workspace=apps/web
 |-------|--------------|-------------|
 | `/` (Landing) | ~85 KB | Static landing page |
 | `/auth/login` | ~90 KB | Login form with validation |
-| `/auth/verify` | ~92 KB | Token verification |
 | `/dashboard` | ~120 KB | Dashboard with data fetching |
 
 **Shared Bundles**:
@@ -139,16 +138,15 @@ npm run build --workspace=apps/web
 
 ### Schema Size
 
-**Tables**: 10
+**Tables**: 8
 - Core: 5 (users, books, memberships, entries, categories)
 - Transactions: 3 (splits, allocations, settlements)
-- Auth: 2 (magic_link_tokens, rate_limits)
 
 **Indexes**: 8 critical indexes
 - Primary keys (all tables)
 - Foreign keys (all relationships)
 - Composite indexes for queries
-- Unique constraints (email, memberships)
+- Unique constraints (memberships)
 
 ### Migration Time
 
@@ -223,8 +221,7 @@ Measured with `curl` on localhost:
 | Endpoint | Avg Response Time | Notes |
 |----------|------------------|-------|
 | `GET /api/docs` | ~50ms | Swagger UI static |
-| `POST /auth/login` | ~100-150ms | DB write + rate limit check |
-| `GET /auth/verify` | ~80-120ms | DB read + write (atomic) |
+| `POST /auth/login` | ~100-150ms | User lookup or creation + JWT issue |
 | `GET /users/me` | ~30-50ms | Simple DB query |
 | `GET /books` | ~50-80ms | Join query with memberships |
 | `POST /books` | ~80-120ms | DB write + membership creation |
@@ -361,7 +358,7 @@ Measured with `curl` on localhost:
 **API**:
 - ✅ Stateless (sessions in JWT cookies)
 - ✅ No shared memory
-- ✅ Database-backed rate limiting (shared state)
+- ⚠️ Global in-memory throttler only (per-instance)
 - Ready for load balancer
 
 **Database**:

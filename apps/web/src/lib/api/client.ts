@@ -28,7 +28,7 @@ async function apiRequest<T>(
   const baseUrl =
     options.baseUrl ||
     process.env.NEXT_PUBLIC_API_URL ||
-    'http://localhost:4000';
+    'http://localhost:4000/api';
   const url = `${baseUrl}${endpoint}`;
 
   const config: RequestInit = {

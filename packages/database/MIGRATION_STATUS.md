@@ -3,16 +3,16 @@
 ## ✅ Completed
 
 1. **Migration SQL Created**: `prisma/migrations/20251028000000_init/migration.sql`
-   - All 10 tables defined: users, books, memberships, entries, splits, allocations, settlements, categories, magic_link_tokens, rate_limits
+   - All 8 tables defined: users, books, memberships, entries, splits, allocations, settlements, categories
    - All indexes and foreign keys included
    - MySQL-specific syntax with utf8mb4 collation
 
 2. **Migration Lock File**: `prisma/migrations/migration_lock.toml`
    - Provider set to MySQL
 
-## ⚠️ Blocked (Network Restriction)
+## ✅ Prisma Client Generation
 
-**Prisma Client Generation** - Cannot download Prisma engines due to 403 Forbidden errors from binaries.prisma.sh
+`npm run db:generate` completes successfully in the current environment (Prisma Client v6.18.0).
 
 ## 🔄 Next Steps
 
@@ -66,8 +66,7 @@ After applying migration, verify with:
 ```sql
 SHOW TABLES;
 -- Should show: users, books, memberships, entries, splits, allocations,
---              settlements, categories, magic_link_tokens, rate_limits,
---              _prisma_migrations
+--              settlements, categories, _prisma_migrations
 
 SELECT * FROM _prisma_migrations;
 -- Should show one row for migration: 20251028000000_init

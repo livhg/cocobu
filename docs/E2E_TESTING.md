@@ -55,9 +55,8 @@ cp .env.example .env
 # Required variables:
 # - DATABASE_URL
 # - JWT_SECRET
-# - SMTP_* (for production)
 # - FRONTEND_URL
-# - NEXT_PUBLIC_API_URL
+# - NEXT_PUBLIC_API_URL (include /api prefix)
 ```
 
 **Expected Result**: ✅ `.env` file created with valid configuration
@@ -103,7 +102,7 @@ npm run db:migrate:deploy
 ```bash
 # Verify tables exist
 docker-compose exec mysql mysql -u root -ppassword cocobu -e "SHOW TABLES;"
-# Expected: users, books, memberships, entries, splits, allocations, settlements, categories, magic_link_tokens, rate_limits
+# Expected: users, books, memberships, entries, splits, allocations, settlements, categories
 ```
 
 ### Step 6: Seed Test Data (Optional)
@@ -124,8 +123,8 @@ npm run db:seed
 **Validation**:
 ```bash
 # Check test users
-docker-compose exec mysql mysql -u root -ppassword cocobu -e "SELECT email, name FROM users;"
-# Expected: alice@, bob@, charlie@example.com
+docker-compose exec mysql mysql -u root -ppassword cocobu -e "SELECT user_id, name FROM users;"
+# Expected: demo user IDs present
 ```
 
 ### Step 7: Start Development Servers
@@ -164,34 +163,23 @@ curl http://localhost:3000
 
 **Expected Result**: ✅ Landing page displays correctly
 
-#### 8.2 Request Magic Link
+#### 8.2 Claim User ID
 
 1. Click "Login" button
-2. Enter test email: `alice@example.com`
+2. Enter test user ID: `alice`
 3. Submit form
 
-**Expected Result**: ✅ Success message "Check your email" displayed
-
-**In Development Mode**:
-```bash
-# Check API logs for magic link
-# You should see: 📧 Magic Link Email (Development Mode)
-# Copy the magic link URL
-```
-
-#### 8.3 Verify Magic Link
-
-1. Copy magic link from API logs
-2. Open link in browser (or use dev-login endpoint)
+**Expected Result**: ✅ Redirected directly to the dashboard
 
 **Development Shortcut**:
 ```bash
 # Use dev-login endpoint
-curl -v http://localhost:4000/api/auth/dev-login?email=alice@example.com
+curl -v "http://localhost:4000/api/auth/dev-login?userId=alice" \
+  -c cookies.txt
 # Expected: Set-Cookie header with session token
 ```
 
-**Expected Result**: ✅ Redirected to dashboard with valid session
+**Expected Result**: ✅ Dashboard accessible with shared `alice` session
 
 #### 8.4 Access Protected Dashboard
 

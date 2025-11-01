@@ -25,7 +25,7 @@ export class BooksService {
       },
       include: {
         owner: {
-          select: { id: true, email: true, name: true },
+          select: { id: true, userId: true, name: true },
         },
         _count: {
           select: { memberships: true, entries: true },
@@ -51,12 +51,12 @@ export class BooksService {
       },
       include: {
         owner: {
-          select: { id: true, email: true, name: true },
+          select: { id: true, userId: true, name: true },
         },
         memberships: {
           include: {
             user: {
-              select: { id: true, email: true, name: true },
+              select: { id: true, userId: true, name: true },
             },
           },
         },
@@ -102,12 +102,12 @@ export class BooksService {
       },
       include: {
         owner: {
-          select: { id: true, email: true, name: true },
+          select: { id: true, userId: true, name: true },
         },
         memberships: {
           include: {
             user: {
-              select: { id: true, email: true, name: true },
+              select: { id: true, userId: true, name: true },
             },
           },
         },

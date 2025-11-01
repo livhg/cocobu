@@ -11,6 +11,7 @@ coverage/
 build/
 dist/
 .next/
+apps/web/dist-tests/
 out/
 
 # Misc
