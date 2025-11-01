@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { FloatingLabelInput } from '@/components/ui/floating-label-input';
 import {
   Card,
   CardContent,
@@ -86,27 +85,20 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">電子郵件</Label>
-              <Input
-                id="email"
-                type="email"
-                inputMode="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-                autoFocus
-                autoComplete="email"
-              />
-            </div>
-
-            {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
-                {error}
-              </div>
-            )}
+            <FloatingLabelInput
+              id="email"
+              label="電子郵件"
+              type="email"
+              inputMode="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isLoading}
+              autoFocus
+              autoComplete="email"
+              error={error || undefined}
+            />
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? '寄送中...' : '寄送登入連結'}
