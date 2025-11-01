@@ -19,9 +19,9 @@ const buttonVariants = cva(
       size: {
         // Updated to meet 44px minimum touch target (WCAG 2.1 AAA)
         default: 'h-11 px-4 py-2', // 44px height
-        sm: 'h-11 rounded-md px-3',  // 44px height (kept same as default for touch)
-        lg: 'h-12 rounded-md px-8',   // 48px height (larger than minimum)
-        icon: 'h-11 w-11',           // 44px x 44px
+        sm: 'h-11 rounded-md px-3', // 44px height (kept same as default for touch)
+        lg: 'h-12 rounded-md px-8', // 48px height (larger than minimum)
+        icon: 'h-11 w-11', // 44px x 44px
       },
     },
     defaultVariants: {

@@ -14,7 +14,7 @@ export const BREAKPOINTS = {
 
 // Touch target minimum sizes (WCAG 2.1 AAA)
 export const TOUCH_TARGET = {
-  min: 44,      // Minimum for AAA compliance
+  min: 44, // Minimum for AAA compliance
   recommended: 48, // Material Design recommendation
 } as const;
 
@@ -55,7 +55,9 @@ export function useIsMobile(): boolean {
  */
 export function useIsTablet(): boolean {
   if (typeof window === 'undefined') return false;
-  return window.innerWidth >= BREAKPOINTS.md && window.innerWidth < BREAKPOINTS.lg;
+  return (
+    window.innerWidth >= BREAKPOINTS.md && window.innerWidth < BREAKPOINTS.lg
+  );
 }
 
 /**

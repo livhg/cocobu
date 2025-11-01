@@ -14,7 +14,15 @@ export interface InputProps
    * - 'email': Email keyboard
    * - 'url': URL keyboard
    */
-  inputMode?: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url';
+  inputMode?:
+    | 'none'
+    | 'text'
+    | 'decimal'
+    | 'numeric'
+    | 'tel'
+    | 'search'
+    | 'email'
+    | 'url';
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(

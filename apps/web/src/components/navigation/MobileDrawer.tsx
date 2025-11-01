@@ -115,7 +115,9 @@ export function MobileDrawer() {
                       )}
                     >
                       <Icon className="h-5 w-5" />
-                      <span className="text-base font-medium">{item.label}</span>
+                      <span className="text-base font-medium">
+                        {item.label}
+                      </span>
                     </Link>
                   </li>
                 );
@@ -135,7 +137,9 @@ export function MobileDrawer() {
                       )}
                     >
                       <Icon className="h-5 w-5" />
-                      <span className="text-base font-medium">{item.label}</span>
+                      <span className="text-base font-medium">
+                        {item.label}
+                      </span>
                     </button>
                   </li>
                 );

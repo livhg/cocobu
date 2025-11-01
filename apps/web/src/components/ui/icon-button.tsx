@@ -21,8 +21,8 @@ const iconButtonVariants = cva(
       },
       size: {
         default: 'h-11 w-11', // 44px x 44px (WCAG AAA)
-        sm: 'h-12 w-12',       // 48px x 48px (Material Design)
-        lg: 'h-14 w-14',       // 56px x 56px (larger touch target)
+        sm: 'h-12 w-12', // 48px x 48px (Material Design)
+        lg: 'h-14 w-14', // 56px x 56px (larger touch target)
       },
     },
     defaultVariants: {
