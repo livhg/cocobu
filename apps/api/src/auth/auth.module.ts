@@ -12,7 +12,11 @@ import { jwtConfig } from '../config/jwt.config';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        return configService.get('jwt');
+        const jwtConfig = configService.get('jwt');
+        if (!jwtConfig) {
+          throw new Error('JWT configuration not loaded properly');
+        }
+        return jwtConfig;
       },
       inject: [ConfigService],
     }),

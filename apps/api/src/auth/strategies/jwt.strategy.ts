@@ -19,6 +19,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     const jwtConfig = configService.get('jwt');
 
+    if (!jwtConfig || !jwtConfig.secret) {
+      throw new Error('JWT configuration not loaded properly');
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
