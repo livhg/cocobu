@@ -1,9 +1,4 @@
-import {
-  IsString,
-  Matches,
-  MinLength,
-  MaxLength,
-} from 'class-validator';
+import { IsString, Matches, MinLength, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { AUTH_CONSTANTS } from '../../common/constants/auth.constants';
 

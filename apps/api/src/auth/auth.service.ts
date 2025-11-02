@@ -123,5 +123,4 @@ export class AuthService {
       user: this.mapUserResponse(user),
     };
   }
-
 }

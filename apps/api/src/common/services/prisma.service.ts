@@ -280,7 +280,7 @@ class MockPrismaClient {
 
   book = {
     findMany: async (args: any) => {
-      let books = Array.from(this.books.values()).filter((book) =>
+      const books = Array.from(this.books.values()).filter((book) =>
         this.bookMatchesWhere(book, args?.where)
       );
 
@@ -303,10 +303,7 @@ class MockPrismaClient {
       if (!book) {
         return null;
       }
-      return this.applySelect(
-        this.buildBookPayload(book, { include }),
-        select
-      );
+      return this.applySelect(this.buildBookPayload(book, { include }), select);
     },
     create: async ({ data, include }: any) => {
       const now = new Date();

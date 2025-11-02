@@ -56,7 +56,8 @@ export async function executeLogin({
     redirect(redirectPath);
   } catch (error) {
     if (error instanceof ApiError) {
-      const message = error.body?.message || error.body?.error || error.statusText;
+      const message =
+        error.body?.message || error.body?.error || error.statusText;
       throw new Error(message || '登入失敗，請稍後再試');
     }
 
@@ -74,13 +75,15 @@ type ApiClient = {
 };
 
 export function createLoginExecutor(apiClient: ApiClient): LoginExecutor {
-  return (userId: string) =>
-    apiClient.post<LoginResponse>('/auth/login', { userId });
+  return (userId: string) => {
+    return apiClient.post<LoginResponse>('/auth/login', { userId });
+  };
 }
 
 export function createDevLoginExecutor(apiClient: ApiClient): LoginExecutor {
-  return (userId: string) =>
-    apiClient.get<LoginResponse>(
+  return (userId: string) => {
+    return apiClient.get<LoginResponse>(
       `/auth/dev-login?userId=${encodeURIComponent(userId)}`
     );
+  };
 }

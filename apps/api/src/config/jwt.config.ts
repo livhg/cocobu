@@ -10,7 +10,8 @@ export const jwtConfig = registerAs('jwt', () => {
   }
 
   // In development, use a default secret if not provided
-  const secret = jwtSecret || 'dev-secret-change-in-production-use-openssl-rand-hex-32';
+  const secret =
+    jwtSecret || 'dev-secret-change-in-production-use-openssl-rand-hex-32';
 
   return {
     secret,

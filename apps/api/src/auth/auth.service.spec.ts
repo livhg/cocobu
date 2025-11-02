@@ -39,7 +39,8 @@ class MockPrismaService {
       this.users.set(record.userId, record);
       return { ...record };
     },
-    findMany: async () => Array.from(this.users.values()).map((user) => ({ ...user })),
+    findMany: async () =>
+      Array.from(this.users.values()).map((user) => ({ ...user })),
   };
 
   clear() {
@@ -78,7 +79,9 @@ describe('AuthService', () => {
     expect(first.user.id).toBe(second.user.id);
 
     const allUsers = await prisma.user.findMany();
-    const sharedUsers = allUsers.filter((user) => user.userId === 'shared-user');
+    const sharedUsers = allUsers.filter(
+      (user) => user.userId === 'shared-user'
+    );
     expect(sharedUsers).toHaveLength(1);
   });
 
