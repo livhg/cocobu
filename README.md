@@ -293,9 +293,8 @@ See [.env.example](./.env.example) for all required environment variables.
 **Key variables:**
 - `DATABASE_URL`: MySQL connection string
 - `JWT_SECRET`: Secret for JWT token generation
-- `SMTP_*`: Email configuration for magic links
-- `FRONTEND_URL`: Frontend application URL
-- `API_URL`: Backend API URL
+- `FRONTEND_URL`: Frontend application URL used for CORS
+- `NEXT_PUBLIC_API_URL`: Base URL for the frontend API client (include `/api` prefix)
 
 ## 📝 License
 

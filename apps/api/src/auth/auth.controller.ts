@@ -6,7 +6,6 @@ import {
   Query,
   Res,
   HttpCode,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -14,7 +13,6 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { AUTH_CONSTANTS } from '../common/constants/auth.constants';
-import { RateLimitGuard, RateLimit } from '../common/guards/rate-limit.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -26,16 +24,11 @@ export class AuthController {
    * Helper method to set session cookie with consistent configuration
    * @param response Express response object
    * @param token JWT session token
-   * @param forceInsecure Force secure flag to false (for dev-only endpoints)
    */
-  private setSessionCookie(
-    response: Response,
-    token: string,
-    forceInsecure = false
-  ): void {
+  private setSessionCookie(response: Response, token: string): void {
     response.cookie('session', token, {
       httpOnly: true,
-      secure: forceInsecure ? false : process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: AUTH_CONSTANTS.COOKIE_MAX_AGE,
     });
@@ -43,33 +36,21 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(200)
-  @UseGuards(RateLimitGuard)
-  @RateLimit({ points: 3, duration: 3600 })
-  @ApiOperation({ summary: 'Request magic link login' })
-  @ApiResponse({ status: 200, description: 'Magic link sent successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid email' })
-  @ApiResponse({ status: 429, description: 'Too many requests' })
-  @ApiResponse({ status: 500, description: 'Rate limit system unavailable' })
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
-  }
-
-  @Get('verify')
-  @ApiOperation({ summary: 'Verify magic link token' })
+  @ApiOperation({ summary: 'Claim a user ID and start a session' })
   @ApiResponse({ status: 200, description: 'Login successful' })
-  @ApiResponse({ status: 401, description: 'Invalid or expired token' })
-  async verify(
-    @Query('token') token: string,
+  @ApiResponse({ status: 400, description: 'Invalid user ID' })
+  async login(
+    @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response
   ) {
-    const result = await this.authService.verify(token);
+    const result = await this.authService.login(loginDto);
     this.setSessionCookie(response, result.accessToken);
     return result;
   }
 
   @Get('dev-login')
   @ApiOperation({
-    summary: 'Development-only: Login without email (bypass magic link)',
+    summary: 'Development-only: Login without validation pipeline',
   })
   @ApiResponse({ status: 200, description: 'Login successful' })
   @ApiResponse({
@@ -77,11 +58,11 @@ export class AuthController {
     description: 'Only available in development mode',
   })
   async devLogin(
-    @Query('email') email: string,
+    @Query('userId') userId: string,
     @Res({ passthrough: true }) response: Response
   ) {
-    const result = await this.authService.devLogin(email);
-    this.setSessionCookie(response, result.accessToken, true);
+    const result = await this.authService.devLogin(userId);
+    this.setSessionCookie(response, result.accessToken);
     return result;
   }
 

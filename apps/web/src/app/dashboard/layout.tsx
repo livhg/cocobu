@@ -83,7 +83,7 @@ export default function DashboardLayout({
 
           <div className="flex items-center gap-2 md:gap-4">
             <span className="hidden text-sm text-gray-600 sm:inline">
-              {user.display_name}
+              {user.name || user.userId}
             </span>
             <Button
               variant="outline"

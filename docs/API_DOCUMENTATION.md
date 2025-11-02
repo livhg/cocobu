@@ -10,33 +10,24 @@ The CocoBu API is a RESTful API built with NestJS that provides endpoints for ex
 
 ## Authentication
 
-The API uses **JWT-based authentication** with magic link email flow.
+The API uses **JWT-based authentication**. Users claim a shareable user ID to start a session—no email delivery or password required.
 
 ### Flow
 
-1. **Request Magic Link**: `POST /auth/login` with email
-2. **Click Link**: User receives email with magic link
-3. **Verify Token**: Link redirects to `/auth/verify?token=...`
-4. **Session Created**: HTTP-only cookie set with 7-day expiration
+1. **Submit User ID**: `POST /auth/login` with `{ "userId": "bujiro" }`
+2. **Session Created**: The server creates (or reuses) the user record, then issues a 7-day HTTP-only cookie.
+3. **Shared Access**: Anyone who logs in with the same user ID will see the same books and entries.
 
 ### Development Mode
 
-For easier testing in development:
+For quick testing in development:
 
 ```bash
-# Direct login without email
-GET /auth/dev-login?email=alice@example.com
+# Direct login without validation middleware
+GET /auth/dev-login?userId=demo
 ```
 
-This bypasses the email flow and immediately creates a session.
-
-## Rate Limiting
-
-**Auth endpoints** are rate-limited:
-- **Limit**: 3 requests per hour per email address
-- **Response**: `429 Too Many Requests` with `Retry-After` header
-- **Storage**: Database-backed (survives restarts)
-- **Security**: Fail-closed (blocks requests on system errors)
+This bypasses additional checks and immediately establishes a session for the provided user ID.
 
 ## Endpoints
 
@@ -44,40 +35,14 @@ This bypasses the email flow and immediately creates a session.
 
 #### POST /auth/login
 
-Request a magic link for passwordless login.
+Claim a user ID and start a session.
 
 **Request Body**:
 ```json
 {
-  "email": "alice@example.com"
+  "userId": "bujiro"
 }
 ```
-
-**Response** (200):
-```json
-{
-  "message": "Magic link sent to your email"
-}
-```
-
-**Response** (429 - Rate Limited):
-```json
-{
-  "statusCode": 429,
-  "message": "Too many requests. Please try again in 3540 seconds.",
-  "error": "Too Many Requests",
-  "retryAfter": 3540
-}
-```
-
----
-
-#### GET /auth/verify
-
-Verify magic link token and create session.
-
-**Query Parameters**:
-- `token` (required): JWT token from magic link
 
 **Response** (200):
 ```json
@@ -85,8 +50,10 @@ Verify magic link token and create session.
   "accessToken": "eyJhbGc...",
   "user": {
     "id": "550e8400-e29b-41d4-a716-446655440000",
-    "email": "alice@example.com",
-    "name": "Alice"
+    "userId": "bujiro",
+    "name": "bujiro",
+    "createdAt": "2025-10-15T10:30:00.000Z",
+    "updatedAt": "2025-10-29T14:25:00.000Z"
   }
 }
 ```
@@ -95,12 +62,16 @@ Verify magic link token and create session.
 
 ---
 
+#### GET /auth/verify (removed)
+
+This endpoint belonged to the legacy email login flow and no longer exists. Requests now return `404 Not Found`.
+
 #### GET /auth/dev-login
 
-Development-only direct login (bypasses email).
+Development-only direct login (bypasses validation guard).
 
 **Query Parameters**:
-- `email` (required): Email address to log in as
+- `userId` (required): User ID to log in as
 
 **Response** (200):
 ```json
@@ -108,7 +79,7 @@ Development-only direct login (bypasses email).
   "accessToken": "eyJhbGc...",
   "user": {
     "id": "550e8400-e29b-41d4-a716-446655440000",
-    "email": "alice@example.com",
+    "userId": "dev-user",
     "name": "Alice"
   }
 }
@@ -150,7 +121,7 @@ Cookie: session=eyJhbGc...
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
-  "email": "alice@example.com",
+  "userId": "alice",
   "name": "Alice",
   "createdAt": "2025-10-15T10:30:00.000Z",
   "updatedAt": "2025-10-15T10:30:00.000Z"
@@ -174,7 +145,7 @@ Update current user profile.
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
-  "email": "alice@example.com",
+  "userId": "alice",
   "name": "Alice Johnson",
   "createdAt": "2025-10-15T10:30:00.000Z",
   "updatedAt": "2025-10-29T14:25:00.000Z"
@@ -209,7 +180,7 @@ List all books where current user is a member.
         "user": {
           "id": "550e8400-e29b-41d4-a716-446655440000",
           "name": "Alice",
-          "email": "alice@example.com"
+          "userId": "alice"
         }
       }
     ]
@@ -243,7 +214,7 @@ Get a specific book by ID.
       "user": {
         "id": "550e8400-e29b-41d4-a716-446655440000",
         "name": "Alice",
-        "email": "alice@example.com"
+        "userId": "alice"
       }
     },
     {
@@ -252,7 +223,7 @@ Get a specific book by ID.
       "user": {
         "id": "550e8400-e29b-41d4-a716-446655440001",
         "name": "Bob",
-        "email": "bob@example.com"
+        "userId": "bob"
       }
     }
   ]
@@ -366,7 +337,6 @@ Delete a book (owner only).
 - **401 Unauthorized**: Missing or invalid authentication
 - **403 Forbidden**: Insufficient permissions
 - **404 Not Found**: Resource not found
-- **429 Too Many Requests**: Rate limit exceeded
 - **500 Internal Server Error**: Server error
 
 ## Data Types
@@ -423,8 +393,10 @@ Currently not implemented for list endpoints.
 ### Testing with curl
 
 ```bash
-# Login
-curl -X POST http://localhost:4000/api/auth/dev-login?email=alice@example.com \
+# Login (claim user ID)
+curl -X POST http://localhost:4000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"userId":"demo"}' \
   -c cookies.txt
 
 # Get user profile
@@ -446,7 +418,7 @@ curl -X POST http://localhost:4000/api/books \
 
 1. Import OpenAPI spec from `/api/docs-json`
 2. Set environment variable `baseUrl` = `http://localhost:4000`
-3. Use the `/auth/dev-login` endpoint to get session cookie
+3. Use the `/auth/login` (or `/auth/dev-login`) endpoint with a user ID to get a session cookie
 4. Postman will automatically include cookies in subsequent requests
 
 ## Known Limitations
@@ -462,13 +434,12 @@ curl -X POST http://localhost:4000/api/books \
 
 - ✅ HTTP-only cookies prevent XSS attacks
 - ✅ CORS configured for specific frontend origin
-- ✅ Rate limiting prevents brute force attacks
+- ✅ Request throttling limits bursts
 - ✅ JWT tokens have expiration
 - ✅ Passwords not stored (passwordless auth)
 - ✅ Database queries parameterized (SQL injection protection)
 - ✅ Input validation with class-validator
 - ⚠️ HTTPS required in production (not enforced in development)
-- ⚠️ Email verification not implemented (trust magic link delivery)
 
 ## Further Reading
 

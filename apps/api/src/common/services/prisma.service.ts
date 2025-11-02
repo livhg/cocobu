@@ -1,7 +1,7 @@
 import {
   Injectable,
-  OnModuleInit,
   OnModuleDestroy,
+  OnModuleInit,
   Logger,
 } from '@nestjs/common';
 import { PrismaClient } from '@cocobu/database';
@@ -9,7 +9,7 @@ import { randomUUID } from 'crypto';
 
 type MockUser = {
   id: string;
-  email: string;
+  userId: string;
   name: string;
   createdAt: Date;
   updatedAt: Date;
@@ -33,35 +33,16 @@ type MockMembership = {
   joinedAt: Date;
 };
 
-type MockMagicLinkToken = {
-  id: string;
-  tokenHash: string;
-  email: string;
-  used: boolean;
-  expiresAt: Date;
-  createdAt: Date;
-};
-
-type MockRateLimit = {
-  id: string;
-  email: string;
-  windowStart: Date;
-  count: number;
-  createdAt: Date;
-};
-
 class MockPrismaClient {
   private readonly users = new Map<string, MockUser>();
   private readonly books = new Map<string, MockBook>();
   private readonly memberships = new Map<string, MockMembership>();
-  private readonly magicLinkTokens = new Map<string, MockMagicLinkToken>();
-  private readonly rateLimits = new Map<string, MockRateLimit>();
 
   constructor() {
     const now = new Date();
     const user: MockUser = {
       id: 'demo-user',
-      email: 'demo@cocobu.app',
+      userId: 'demo',
       name: 'Demo User',
       createdAt: now,
       updatedAt: now,
@@ -109,10 +90,81 @@ class MockPrismaClient {
     });
   }
 
+  private applySelect<T extends Record<string, any>>(entity: T, select?: any) {
+    if (!select) {
+      return this.clone(entity);
+    }
+
+    const result: Record<string, any> = {};
+    for (const key of Object.keys(select)) {
+      if (select[key]) {
+        result[key] = this.clone(entity[key as keyof T]);
+      }
+    }
+    return result;
+  }
+
   private findMembershipsByBook(bookId: string) {
     return Array.from(this.memberships.values()).filter(
       (membership) => membership.bookId === bookId
     );
+  }
+
+  private bookMatchesWhere(book: MockBook, where: any) {
+    if (!where) {
+      return true;
+    }
+
+    if (where.id && where.id !== book.id) {
+      return false;
+    }
+
+    if (where.ownerId && where.ownerId !== book.ownerId) {
+      return false;
+    }
+
+    if (where.memberships?.some?.userId) {
+      const memberships = this.findMembershipsByBook(book.id);
+      return memberships.some(
+        (membership) => membership.userId === where.memberships.some.userId
+      );
+    }
+
+    if (where.OR) {
+      return where.OR.some((condition: any) =>
+        this.bookMatchesWhere(book, condition)
+      );
+    }
+
+    return true;
+  }
+
+  private userMatchesWhere(user: MockUser, where: any) {
+    if (!where) {
+      return true;
+    }
+
+    if (where.id && where.id !== user.id) {
+      return false;
+    }
+
+    if (where.userId && where.userId !== user.userId) {
+      return false;
+    }
+
+    if (where.AND) {
+      return where.AND.every((condition: any) =>
+        this.userMatchesWhere(user, condition)
+      );
+    }
+
+    if (where.OR) {
+      return where.OR.some((condition: any) =>
+        this.userMatchesWhere(user, condition)
+      );
+    }
+
+    return true;
   }
 
   private buildBookPayload(book: MockBook, args: any = {}) {
@@ -164,67 +216,31 @@ class MockPrismaClient {
     return base;
   }
 
-  private applySelect<T extends Record<string, any>>(entity: T, select?: any) {
-    if (!select) {
-      return this.clone(entity);
-    }
-
-    const result: Record<string, any> = {};
-    for (const key of Object.keys(select)) {
-      if (select[key]) {
-        result[key] = this.clone(entity[key as keyof T]);
-      }
-    }
-    return result;
-  }
-
-  private userMatchesWhere(user: MockUser, where: any) {
-    if (!where) {
-      return true;
-    }
-
-    if (where.id && where.id !== user.id) {
-      return false;
-    }
-
-    if (where.email && where.email !== user.email) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private bookMatchesWhere(book: MockBook, where: any) {
-    if (!where) {
-      return true;
-    }
-
-    if (where.id && where.id !== book.id) {
-      return false;
-    }
-
-    if (where.ownerId && where.ownerId !== book.ownerId) {
-      return false;
-    }
-
-    if (where.memberships?.some?.userId) {
-      const memberships = this.findMembershipsByBook(book.id);
-      return memberships.some(
-        (membership) => membership.userId === where.memberships.some.userId
-      );
-    }
-
-    if (where.OR) {
-      return where.OR.some((condition: any) =>
-        this.bookMatchesWhere(book, condition)
-      );
-    }
-
-    return true;
-  }
-
   user = {
     findUnique: async ({ where, select }: any) => {
+      if (where?.id) {
+        const user = this.users.get(where.id);
+        if (!user) {
+          return null;
+        }
+        return this.applySelect(user, select);
+      }
+
+      for (const candidate of this.users.values()) {
+        if (this.userMatchesWhere(candidate, where)) {
+          return this.applySelect(candidate, select);
+        }
+      }
+
+      return null;
+    },
+    findMany: async ({ where, select }: any = {}) => {
+      const users = Array.from(this.users.values()).filter((user) =>
+        this.userMatchesWhere(user, where)
+      );
+      return users.map((user) => this.applySelect(user, select));
+    },
+    findFirst: async ({ where, select }: any) => {
       for (const user of this.users.values()) {
         if (this.userMatchesWhere(user, where)) {
           return this.applySelect(user, select);
@@ -236,8 +252,8 @@ class MockPrismaClient {
       const now = new Date();
       const user: MockUser = {
         id: data.id ?? randomUUID(),
-        email: data.email,
-        name: data.name ?? data.email.split('@')[0],
+        userId: data.userId,
+        name: data.name ?? data.userId,
         createdAt: now,
         updatedAt: now,
       };
@@ -250,8 +266,8 @@ class MockPrismaClient {
         throw new Error('User not found');
       }
       const stored = this.users.get((user as MockUser).id)!;
-      if (data.email) {
-        stored.email = data.email;
+      if (data.userId) {
+        stored.userId = data.userId;
       }
       if (data.name) {
         stored.name = data.name;
@@ -264,7 +280,7 @@ class MockPrismaClient {
 
   book = {
     findMany: async (args: any) => {
-      let books = Array.from(this.books.values()).filter((book) =>
+      const books = Array.from(this.books.values()).filter((book) =>
         this.bookMatchesWhere(book, args?.where)
       );
 
@@ -287,10 +303,7 @@ class MockPrismaClient {
       if (!book) {
         return null;
       }
-      return this.applySelect(
-        this.buildBookPayload(book, { include }),
-        select
-      );
+      return this.applySelect(this.buildBookPayload(book, { include }), select);
     },
     create: async ({ data, include }: any) => {
       const now = new Date();
@@ -336,100 +349,8 @@ class MockPrismaClient {
     },
   };
 
-  magicLinkToken = {
-    create: async ({ data }: any) => {
-      const token: MockMagicLinkToken = {
-        id: randomUUID(),
-        tokenHash: data.tokenHash,
-        email: data.email,
-        used: data.used ?? false,
-        expiresAt: data.expiresAt,
-        createdAt: new Date(),
-      };
-      this.magicLinkTokens.set(token.tokenHash, token);
-      return this.clone(token);
-    },
-    findUnique: async ({ where }: any) => {
-      const token = this.magicLinkTokens.get(where?.tokenHash);
-      return token ? this.clone(token) : null;
-    },
-    delete: async ({ where }: any) => {
-      const token = this.magicLinkTokens.get(where?.tokenHash);
-      if (token) {
-        this.magicLinkTokens.delete(where.tokenHash);
-        return this.clone(token);
-      }
-      return null;
-    },
-    update: async ({ where, data }: any) => {
-      const token = this.magicLinkTokens.get(where?.tokenHash);
-      if (!token) {
-        throw new Error('Token not found');
-      }
-      if (data.used !== undefined) {
-        token.used = data.used;
-      }
-      this.magicLinkTokens.set(token.tokenHash, token);
-      return this.clone(token);
-    },
-    deleteMany: async ({ where }: any) => {
-      let count = 0;
-      for (const token of Array.from(this.magicLinkTokens.values())) {
-        if (
-          where?.expiresAt?.lt &&
-          token.expiresAt.getTime() < where.expiresAt.lt.getTime()
-        ) {
-          this.magicLinkTokens.delete(token.tokenHash);
-          count += 1;
-        }
-      }
-      return { count };
-    },
-  };
-
-  rateLimit = {
-    upsert: async ({ where, create, update }: any) => {
-      const key = `${where.email_windowStart.email}|${where.email_windowStart.windowStart.toISOString()}`;
-      const existing = this.rateLimits.get(key);
-
-      if (!existing) {
-        const record: MockRateLimit = {
-          id: randomUUID(),
-          email: create.email,
-          windowStart: create.windowStart,
-          count: create.count ?? 1,
-          createdAt: new Date(),
-        };
-        this.rateLimits.set(key, record);
-        return this.clone(record);
-      }
-
-      const previousCount = existing.count;
-      if (update?.count?.increment) {
-        existing.count += update.count.increment;
-      }
-      this.rateLimits.set(key, existing);
-      return this.clone({ ...existing, count: previousCount });
-    },
-    deleteMany: async ({ where }: any) => {
-      let count = 0;
-      for (const [key, record] of Array.from(this.rateLimits.entries())) {
-        if (
-          where?.windowStart?.lt &&
-          record.windowStart.getTime() < where.windowStart.lt.getTime()
-        ) {
-          this.rateLimits.delete(key);
-          count += 1;
-        }
-      }
-      return { count };
-    },
-  };
-
   async $transaction<T>(fn: (tx: any) => Promise<T>): Promise<T> {
     return fn({
-      magicLinkToken: this.magicLinkToken,
-      rateLimit: this.rateLimit,
       user: this.user,
       book: this.book,
     });

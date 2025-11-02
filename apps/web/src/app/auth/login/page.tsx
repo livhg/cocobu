@@ -11,16 +11,21 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { api, ApiError } from '@/lib/api';
+import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth-store';
 import Link from 'next/link';
+import { AUTH_CONSTANTS } from '@/lib/constants';
+import {
+  executeLogin,
+  createLoginExecutor,
+  createDevLoginExecutor,
+} from './logic';
 
 export default function LoginPage() {
   const router = useRouter();
   const { setUser } = useAuthStore();
-  const [email, setEmail] = useState('');
+  const [userId, setUserId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -30,14 +35,14 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      await api.post('/auth/login', { email });
-      setIsSuccess(true);
+      await executeLogin({
+        executor: createLoginExecutor(api),
+        userId,
+        setUser,
+        redirect: (path) => router.push(path),
+      });
     } catch (err) {
-      if (err instanceof ApiError) {
-        // Extract detailed error message from backend
-        const message = err.body?.message || err.body?.error || err.statusText;
-        setError(message || '登入失敗，請稍後再試');
-      } else if (err instanceof Error) {
+      if (err instanceof Error) {
         setError(err.message);
       } else {
         setError('登入失敗，請稍後再試');
@@ -48,30 +53,18 @@ export default function LoginPage() {
   };
 
   const handleDevLogin = async () => {
-    if (!email) {
-      setError('請輸入電子郵件地址');
-      return;
-    }
-
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await api.get<{
-        accessToken: string;
-        user: any;
-      }>(`/auth/dev-login?email=${encodeURIComponent(email)}`);
-
-      // Set user in auth store
-      setUser(result.user);
-
-      // Redirect to dashboard
-      router.push('/dashboard');
+      await executeLogin({
+        executor: createDevLoginExecutor(api),
+        userId,
+        setUser,
+        redirect: (path) => router.push(path),
+      });
     } catch (err) {
-      if (err instanceof ApiError) {
-        const message = err.body?.message || err.body?.error || err.statusText;
-        setError(message || '開發登入失敗');
-      } else if (err instanceof Error) {
+      if (err instanceof Error) {
         setError(err.message);
       } else {
         setError('開發登入失敗');
@@ -81,66 +74,41 @@ export default function LoginPage() {
     }
   };
 
-  if (isSuccess) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-xl md:text-2xl">查看您的信箱</CardTitle>
-            <CardDescription className="text-base">
-              我們已經將登入連結寄送到 <strong>{email}</strong>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3 md:space-y-4">
-              <p className="text-sm text-gray-600 md:text-base">
-                請點擊信件中的連結來完成登入。連結將在 15 分鐘後失效。
-              </p>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  setIsSuccess(false);
-                  setEmail('');
-                }}
-              >
-                使用其他信箱
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-xl md:text-2xl">登入 CocoBu</CardTitle>
           <CardDescription className="text-base">
-            輸入您的電子郵件地址，我們會寄送登入連結給您
+            輸入自訂的使用者 ID 即可開始使用。若使用者 ID 已被他人登入，
+            你們會共享相同的內容。
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
             <FloatingLabelInput
-              id="email"
-              label="電子郵件"
-              type="email"
-              inputMode="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="userId"
+              label="使用者 ID"
+              type="text"
+              inputMode="text"
+              placeholder="例如 bujiro"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
               required
               disabled={isLoading}
               autoFocus
-              autoComplete="email"
+              autoComplete="username"
               error={error || undefined}
             />
 
+            <p className="text-xs text-gray-500">
+              使用小寫英文、數字或 - 號，長度需在
+              {AUTH_CONSTANTS.USER_ID_MIN_LENGTH}~
+              {AUTH_CONSTANTS.USER_ID_MAX_LENGTH} 字元之間。
+            </p>
+
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? '寄送中...' : '寄送登入連結'}
+              {isLoading ? '登入中...' : '立即登入'}
             </Button>
 
             {isDevelopment && (

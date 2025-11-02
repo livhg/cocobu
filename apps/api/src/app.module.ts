@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
@@ -17,7 +16,6 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    ScheduleModule.forRoot(),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => [
@@ -36,7 +34,6 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
   controllers: [AppController],
   providers: [
     AppService,
-    // Apply guards in order: rate limiting first, then authentication
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

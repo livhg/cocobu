@@ -5,11 +5,10 @@
 
 export interface User {
   id: string;
-  email: string;
-  real_name: string | null;
-  display_name: string;
-  created_at: string;
-  updated_at: string;
+  userId: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Book {
@@ -41,20 +40,12 @@ export interface Entry {
 }
 
 export interface LoginRequest {
-  email: string;
+  userId: string;
 }
 
 export interface LoginResponse {
-  message: string;
-}
-
-export interface VerifyTokenRequest {
-  token: string;
-}
-
-export interface VerifyTokenResponse {
+  accessToken: string;
   user: User;
-  token: string;
 }
 
 export interface CreateBookRequest {

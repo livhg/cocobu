@@ -28,7 +28,7 @@ export class UsersController {
   async getMe(@CurrentUser() user: UserDto) {
     return {
       id: user.id,
-      email: user.email,
+      userId: user.userId,
       name: user.name,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,

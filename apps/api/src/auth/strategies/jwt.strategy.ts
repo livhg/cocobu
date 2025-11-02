@@ -8,7 +8,7 @@ import { PrismaService } from '../../common/services/prisma.service';
 interface JwtPayload {
   type: 'session';
   sub: string;
-  email: string;
+  userId: string;
 }
 
 @Injectable()
