@@ -1,17 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
-import { Download, ArrowLeft, CheckCircle2, AlertTriangle, ShieldCheck, Smartphone } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Download, ArrowLeft, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 export default function DownloadPage() {
-  const [downloadStarted, setDownloadStarted] = useState(false);
   const apkUrl = '/releases/cocobu-latest.apk';
 
   useEffect(() => {
-    // Automatically trigger APK download after 1 second
+    // Automatically trigger APK download after 800ms
     const timer = setTimeout(() => {
       const link = document.createElement('a');
       link.href = apkUrl;
@@ -19,7 +17,6 @@ export default function DownloadPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      setDownloadStarted(true);
     }, 800);
 
     return () => clearTimeout(timer);

@@ -2,24 +2,18 @@ import Link from 'next/link';
 import {
   Download,
   Smartphone,
-  QrCode,
   Sparkles,
   Calculator,
-  Zap,
   Cloud,
   CalendarDays,
-  ShieldCheck,
   CheckCircle2,
   ExternalLink,
-  ChevronRight,
   Tag,
-  ArrowDownToLine,
   RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
