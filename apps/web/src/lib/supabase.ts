@@ -101,22 +101,27 @@ class SupabaseService {
     }
   }
 
-  // 取得完整所有交易清單 (分批拉取以支援 1,000+ 筆)
+  // 取得目前使用者所屬的交易清單 (分批拉取以支援 1,000+ 筆)
   async fetchAllTransactions(): Promise<Transaction[]> {
+    const user = this.getCurrentUser();
+    if (!user || !user.id) {
+      throw new Error('未登入：請先使用 Google 帳號登入');
+    }
+
     const all: Transaction[] = [];
     const limit = 1000;
     let offset = 0;
     let hasMore = true;
 
     while (hasMore) {
-      const url = `${SUPABASE_URL}/rest/v1/transactions?select=*&order=date.desc,id.desc&offset=${offset}&limit=${limit}`;
+      const url = `${SUPABASE_URL}/rest/v1/transactions?user_id=eq.${user.id}&select=*&order=date.desc,id.desc&offset=${offset}&limit=${limit}`;
       const res = await fetch(url, {
         headers: this.getHeaders({ 'Prefer': 'count=exact' }),
         cache: 'no-store',
       });
 
       if (!res.ok) {
-        throw new Error(`Failed to fetch transactions: ${res.statusText}`);
+        throw new Error(`載入記帳失敗: ${res.statusText}`);
       }
 
       const rows: Transaction[] = await res.json();
@@ -132,13 +137,21 @@ class SupabaseService {
     return all;
   }
 
-  // 建立新交易
+  // 建立新交易 (自動綁定目前登入使用者 user_id)
   async createTransaction(tx: Omit<Transaction, 'id' | 'created_at'>): Promise<Transaction> {
+    const user = this.getCurrentUser();
+    if (!user || !user.id) {
+      throw new Error('未登入：請先使用 Google 帳號登入');
+    }
+
     const url = `${SUPABASE_URL}/rest/v1/transactions`;
     const res = await fetch(url, {
       method: 'POST',
       headers: this.getHeaders({ 'Prefer': 'return=representation' }),
-      body: JSON.stringify(tx),
+      body: JSON.stringify({
+        ...tx,
+        user_id: user.id,
+      }),
     });
 
     if (!res.ok) {
@@ -150,9 +163,14 @@ class SupabaseService {
     return created[0];
   }
 
-  // 刪除交易
+  // 刪除交易 (限本人)
   async deleteTransaction(id: string): Promise<boolean> {
-    const url = `${SUPABASE_URL}/rest/v1/transactions?id=eq.${id}`;
+    const user = this.getCurrentUser();
+    if (!user || !user.id) {
+      throw new Error('未登入：請先使用 Google 帳號登入');
+    }
+
+    const url = `${SUPABASE_URL}/rest/v1/transactions?id=eq.${id}&user_id=eq.${user.id}`;
     const res = await fetch(url, {
       method: 'DELETE',
       headers: this.getHeaders(),

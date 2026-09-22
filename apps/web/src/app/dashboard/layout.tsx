@@ -25,6 +25,7 @@ export default function DashboardLayout({
   const handleLogout = () => {
     supabaseService.logout();
     setUser(null);
+    window.location.reload();
   };
 
   return (
