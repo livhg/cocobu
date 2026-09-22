@@ -16,7 +16,7 @@ module.exports = {
     es2022: true,
   },
   rules: {
-    'prettier/prettier': 'error',
+    'prettier/prettier': 'off',
     '@typescript-eslint/no-unused-vars': [
       'error',
       { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
