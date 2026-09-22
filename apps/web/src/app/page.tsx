@@ -57,8 +57,8 @@ export default function Home() {
               <RefreshCw className="w-3.5 h-3.5 mr-1" />
               OTA Version API
             </Link>
-            <Button asChild variant="outline" size="sm" className="border-slate-800 bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white">
-              <Link href="/auth/login">Web 帳本</Link>
+            <Button asChild variant="outline" size="sm" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 hover:text-white">
+              <Link href="/dashboard">Web 財務後台</Link>
             </Button>
             <Button asChild size="sm" className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold shadow-md shadow-emerald-500/20">
               <Link href={apkDownloadUrl}>
@@ -91,7 +91,7 @@ export default function Home() {
               </h1>
 
               <p className="mt-6 text-base sm:text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                告別繁瑣步驟！CoCoBu 叩叩簿結合原生計算機鍵盤、地點與標籤快捷輸入、離線優先快取與 Supabase 雲端多裝置同步，讓您 3 秒搞定每一筆開銷。
+                告別繁瑣步驟！CoCoBu 叩叩簿結合原生計算機鍵盤、地點與標籤快捷輸入、離線優先快取與 Supabase 雲端多裝置同步，現在更支援全新 Web 財務 Dashboard，讓您隨時在大螢幕瀏覽 1,399+ 筆歷史收支與統計圖表。
               </p>
 
               {/* Action Buttons */}
@@ -113,10 +113,10 @@ export default function Home() {
                   size="lg"
                   className="border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-200 px-7 py-6 rounded-2xl text-base"
                 >
-                  <a href="#install-guide">
-                    <Smartphone className="w-4 h-4 mr-2 text-emerald-400" />
-                    安裝指南 & FAQ
-                  </a>
+                  <Link href="/dashboard">
+                    <Sparkles className="w-4 h-4 mr-2 text-emerald-400" />
+                    進入 Web 財務後台
+                  </Link>
                 </Button>
               </div>
 
