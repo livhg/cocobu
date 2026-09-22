@@ -363,7 +363,7 @@ export default function Home() {
             <span>•</span>
             <Link href="/download" className="hover:text-emerald-400">直接下載</Link>
             <span>•</span>
-            <Link href="/auth/login" className="hover:text-emerald-400">Web 帳本</Link>
+            <Link href="/dashboard" className="hover:text-emerald-400">Web 財務後台</Link>
           </div>
         </div>
       </footer>
