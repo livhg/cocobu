@@ -69,7 +69,9 @@ export const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
           </div>
           <div>
             <h3 className="font-semibold text-white text-base">支出類別分佈</h3>
-            <p className="text-xs text-slate-400">點擊項目可快速在下方過濾流水帳</p>
+            <p className="text-xs text-slate-400">
+              總支出 {formatMoney(totalExpense)} · 點擊項目可過濾
+            </p>
           </div>
         </div>
         {selectedCategory && (
